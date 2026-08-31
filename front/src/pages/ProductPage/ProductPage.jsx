@@ -8,6 +8,7 @@ import ShareIcon from '@mui/icons-material/Share';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CloseIcon from '@mui/icons-material/Close';
 
+
 function ProductPage() {
   const { id } = useParams();
 
@@ -61,6 +62,13 @@ function ProductPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  useEffect(() => {
+    if (product) {
+      document.title = `${product.name} — AVELINE`;
+    }
+  }, [product]);
+
+
   if (loading) return <p>Загрузка...</p>;
   if (error) return <p>{error}</p>;
   if (!product) return null;
@@ -72,7 +80,7 @@ function ProductPage() {
 
   const productUrl = window.location.href;
 
-  const whatsappUrl = `https://wa.me/996707780048?text=${encodeURIComponent(
+  const whatsappUrl = `https://wa.me/996500776797?text=${encodeURIComponent(
     `Здравствуйте! Интересует товар "${product.name}" (${product.price} сом).
 
 🔗 ${productUrl}`
@@ -110,6 +118,7 @@ function ProductPage() {
       console.error('Не удалось скопировать ссылку:', err);
     }
   };
+
 
   return (
     <div className="product-page">

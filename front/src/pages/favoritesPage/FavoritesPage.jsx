@@ -13,6 +13,10 @@ function FavoritesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = 'Избранное — AVELINE';
+  }, []);
+
+  useEffect(() => {
     api
       .get('/products')
       .then((res) => {

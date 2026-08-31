@@ -13,6 +13,10 @@ function HomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = 'AVELINE | Магазин украшений';
+  }, []);
+
+  useEffect(() => {
     setLoading(true);
 
     const params = {};
@@ -21,8 +25,10 @@ function HomePage() {
 
     api
       .get('/products', { params })
-      .then((res) => setProducts(res.data))
-      .catch((err) => console.error('Ошибка загрузки товаров:', err))
+      .then((res) => {
+        console.log('Ответ API:', res.data);
+        setProducts(res.data);
+      }).catch((err) => console.error('Ошибка загрузки товаров:', err))
       .finally(() => setLoading(false));
   }, [category, sort]);
 

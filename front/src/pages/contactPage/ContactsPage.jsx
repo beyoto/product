@@ -8,8 +8,15 @@ import Header from '../../components/Header.jsx';
 import Footer from '../../components/Footer.jsx';
 
 import './ContactsPage.css';
+import { useEffect } from 'react';
+
 
 function ContactsPage() {
+
+  useEffect(() => {
+    document.title = 'AVELINE | Магазин украшений';
+  }, []);
+
   return (
     <>
       <div className="home-page">
@@ -21,7 +28,7 @@ function ContactsPage() {
             <h1>Свяжитесь с нами</h1>
 
             <p>
-              Есть вопросы по украшениям, хотите оформить заказ или просто хотите узнать больше? 
+              Есть вопросы по украшениям, хотите оформить заказ или просто хотите узнать больше?
               <br className="contacts-page__mobile-break" /> Мы всегда на связи.
             </p>
           </div>
