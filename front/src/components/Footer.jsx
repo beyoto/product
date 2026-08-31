@@ -24,9 +24,9 @@ function Footer() {
         <div className="site-footer__contacts">
           <a href="tel:+996707780048">
             <PhoneIcon fontSize="small" />
-            +996500778797
+            +996507996006
           </a>
-          <a href="https://wa.me/996500776797" target="_blank" rel="noopener noreferrer">
+          <a href="https://wa.me/996507996006" target="_blank" rel="noopener noreferrer">
             <WhatsAppIcon fontSize="small" />
             WhatsApp
           </a>
@@ -34,7 +34,7 @@ function Footer() {
             <InstagramIcon fontSize="small" />
             Instagram
           </a>
-          <a href="https://2gis.kg/bishkek/твоя_ссылка" target="_blank" rel="noopener noreferrer">
+          <a href="https://2gis.kg/bishkek/geo/15763234351009271/74.637773,42.842830" target="_blank" rel="noopener noreferrer">
             <PlaceIcon fontSize="small" />
             2ГИС
           </a>

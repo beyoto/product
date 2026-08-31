@@ -35,7 +35,7 @@ function ContactsPage() {
 
           <div className="contacts-page__grid">
             <a
-              href="tel:+996707780048"
+              href="tel:+996507996006"
               className="contact-card"
             >
               <div className="contact-card__icon">
@@ -58,7 +58,7 @@ function ContactsPage() {
             </a>
 
             <a
-              href="https://wa.me/996500778797"
+              href="https://wa.me/996507996006"
               target="_blank"
               rel="noopener noreferrer"
               className="contact-card"
@@ -108,7 +108,7 @@ function ContactsPage() {
             </a>
 
             <a
-              href="https://2gis.kg/bishkek/твоя_ссылка"
+              href="https://2gis.kg/bishkek/geo/15763234351009271/74.637773,42.842830"
               target="_blank"
               rel="noopener noreferrer"
               className="contact-card"
