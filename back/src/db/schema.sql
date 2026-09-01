@@ -14,6 +14,7 @@ CREATE TABLE products (
   price NUMERIC(10, 2) NOT NULL,
   category VARCHAR(20) NOT NULL CHECK (category IN ('ring', 'bracelet', 'chain', 'set')),
   is_active BOOLEAN DEFAULT true,
+  views_count INTEGER DEFAULT 0,
   stock_quantity INTEGER DEFAULT 0,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()

@@ -60,6 +60,7 @@ router.get('/admin/all', checkAuth, async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+
     const result = await pool.query(
       `SELECT p.*, 
         COALESCE(json_agg(pi.image_url) FILTER (WHERE pi.image_url IS NOT NULL), '[]') AS images
@@ -74,6 +75,8 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
 
+    pool.query('UPDATE products SET views_count = views_count + 1 WHERE id = $1', [id]);
+    
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
