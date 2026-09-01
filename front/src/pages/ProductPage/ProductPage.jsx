@@ -80,7 +80,7 @@ function ProductPage() {
 
   const productUrl = window.location.href;
 
-  const whatsappUrl = `https://wa.me/996500776797?text=${encodeURIComponent(
+  const whatsappUrl = `https://wa.me/996507996006?text=${encodeURIComponent(
     `Здравствуйте! Интересует товар "${product.name}" (${product.price} сом).
 
 🔗 ${productUrl}`
