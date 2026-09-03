@@ -12,6 +12,9 @@ app.use(express.json());
 const productRouter = require('./routes/products');
 app.use('/api/products', productRouter)
 
+const guestRouter = require('./routes/guests');
+app.use('/api/guests', guestRouter);
+
 const authRouter = require('./routes/auth');
 app.use('/api/auth', authRouter);
 

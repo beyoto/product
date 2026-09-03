@@ -38,6 +38,26 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.post('/guests', async (req, res) => {
+  const { name, attending, guestsCount } = req.body;
+
+  if (!name || typeof attending !== 'boolean') {
+    return res.status(400).json({ error: 'Некорректные данные' });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO guests (name, attending, guests_count) VALUES ($1, $2, $3) RETURNING *`,
+      [name, attending, guestsCount || 1]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+
 // GET /api/products/admin/all — все товары для админки (включая скрытые)
 router.get('/admin/all', checkAuth, async (req, res) => {
   try {
