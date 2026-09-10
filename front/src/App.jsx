@@ -12,6 +12,7 @@ import ProductPage from './pages/ProductPage/ProductPage.jsx';
 import EditProduct from './pages/editProduct/EditProduct.jsx';
 import SplashScreen from './components/SplashScreen.jsx';
 import ContactsPage from './pages/contactPage/ContactsPage.jsx';
+import AdminAnalytics from './pages/adminAnalytics/AdminAnalytics.jsx';
 
 const App = () => {
   return (
@@ -46,6 +47,14 @@ const App = () => {
                 element={
                   <ProtectedRoute>
                     <EditProduct />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/analytics"
+                element={
+                  <ProtectedRoute>
+                    <AdminAnalytics />
                   </ProtectedRoute>
                 }
               />

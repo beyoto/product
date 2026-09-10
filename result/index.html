@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Jewelry Analytics</title>
+
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #f8f7f5;
+            --card: #ffffff;
+            --text: #1f1d1a;
+            --muted: #918c85;
+            --border: #ebe8e3;
+
+            --gold: #b89163;
+            --gold-light: #f3eadf;
+            --gold-dark: #947247;
+
+            --green: #56896b;
+
+            --shadow:
+                0 10px 40px rgba(40, 31, 22, 0.045);
+        }
+
+        body {
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            background: var(--bg);
+            color: var(--text);
+
+            min-height: 100vh;
+        }
+
+        /* =====================================
+           HEADER
+        ===================================== */
+
+        header {
+            height: 76px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 42px;
+
+            background: rgba(255, 255, 255, 0.88);
+            border-bottom: 1px solid var(--border);
+
+            position: sticky;
+            top: 0;
+            z-index: 100;
+
+            backdrop-filter: blur(15px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: var(--gold-light);
+            color: var(--gold);
+
+            border-radius: 12px;
+
+            font-size: 20px;
+        }
+
+        .brand-name {
+            font-family: Georgia, serif;
+            font-size: 17px;
+            font-weight: 500;
+        }
+
+        .brand-subtitle {
+            margin-top: 2px;
+
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .connection {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .connection-dot {
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: var(--green);
+
+            box-shadow:
+                0 0 0 4px rgba(86, 137, 107, 0.10);
+        }
+
+        /* =====================================
+           MAIN
+        ===================================== */
+
+        main {
+            width: min(1380px, calc(100% - 50px));
+
+            margin: 0 auto;
+
+            padding: 48px 0 70px;
+        }
+
+        .heading {
+            margin-bottom: 30px;
+        }
+
+        .heading h1 {
+            font-family: Georgia, serif;
+
+            font-size: clamp(32px, 4vw, 46px);
+
+            font-weight: 400;
+
+            letter-spacing: -1.8px;
+        }
+
+        .heading p {
+            margin-top: 8px;
+
+            color: var(--muted);
+
+            font-size: 14px;
+        }
+
+        /* =====================================
+           STATS
+        ===================================== */
+
+        .stats {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+
+            gap: 18px;
+
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            background: var(--card);
+
+            border: 1px solid var(--border);
+
+            border-radius: 18px;
+
+            padding: 24px;
+
+            box-shadow: var(--shadow);
+        }
+
+        .stat-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            margin-bottom: 20px;
+        }
+
+        .stat-title {
+            color: var(--muted);
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.8px;
+        }
+
+        .stat-icon {
+            width: 35px;
+            height: 35px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: var(--gold-light);
+
+            color: var(--gold);
+
+            border-radius: 10px;
+
+            font-size: 16px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+
+            font-weight: 700;
+
+            letter-spacing: -1px;
+        }
+
+        .stat-description {
+            margin-top: 5px;
+
+            color: var(--muted);
+
+            font-size: 12px;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* =====================================
+           CHART CARD
+        ===================================== */
+
+        .chart-card {
+            background: var(--card);
+
+            border: 1px solid var(--border);
+
+            border-radius: 20px;
+
+            box-shadow: var(--shadow);
+
+            padding: 28px;
+
+            margin-bottom: 20px;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+
+            margin-bottom: 5px;
+        }
+
+        .chart-title h2 {
+            font-size: 17px;
+
+            font-weight: 700;
+        }
+
+        .chart-title p {
+            margin-top: 5px;
+
+            color: var(--muted);
+
+            font-size: 12px;
+        }
+
+        .chart-badge {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+
+            padding: 8px 11px;
+
+            background: var(--gold-light);
+
+            color: var(--gold-dark);
+
+            border-radius: 9px;
+
+            font-size: 11px;
+
+            font-weight: 600;
+        }
+
+        .chart-badge-dot {
+            width: 6px;
+            height: 6px;
+
+            background: var(--gold);
+
+            border-radius: 50%;
+        }
+
+        #chart {
+            height: 390px;
+        }
+
+        /* =====================================
+           PRODUCTS
+        ===================================== */
+
+        .products-card {
+            background: var(--card);
+
+            border: 1px solid var(--border);
+
+            border-radius: 20px;
+
+            box-shadow: var(--shadow);
+
+            overflow: hidden;
+        }
+
+        .products-header {
+            padding: 23px 26px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 20px;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        .products-title h2 {
+            font-size: 17px;
+        }
+
+        .products-title p {
+            margin-top: 5px;
+
+            color: var(--muted);
+
+            font-size: 12px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 9px;
+        }
+
+        input,
+        select {
+            height: 38px;
+
+            border: 1px solid var(--border);
+
+            background: #faf9f7;
+
+            color: var(--text);
+
+            border-radius: 10px;
+
+            padding: 0 12px;
+
+            outline: none;
+
+            font-size: 12px;
+
+            transition: 0.2s;
+        }
+
+        input {
+            width: 230px;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--gold);
+            background: white;
+        }
+
+        /* =====================================
+           TABLE
+        ===================================== */
+
+        .table-head,
+        .product-row {
+            display: grid;
+
+            grid-template-columns:
+                60px
+                minmax(250px, 1fr)
+                180px
+                220px;
+        }
+
+        .table-head {
+            padding: 12px 26px;
+
+            background: #faf9f7;
+
+            color: var(--muted);
+
+            font-size: 10px;
+
+            font-weight: 700;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.7px;
+        }
+
+        .product-row {
+            min-height: 72px;
+
+            padding: 14px 26px;
+
+            align-items: center;
+
+            border-top: 1px solid var(--border);
+
+            transition:
+                background 0.2s,
+                transform 0.2s;
+        }
+
+        .product-row:hover {
+            background: #fdfbf9;
+        }
+
+        .rank {
+            color: var(--muted);
+
+            font-size: 12px;
+
+            font-weight: 600;
+        }
+
+        .product {
+            display: flex;
+            align-items: center;
+
+            gap: 13px;
+
+            min-width: 0;
+        }
+
+        .product-icon {
+            width: 40px;
+            height: 40px;
+
+            flex-shrink: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f5eee5,
+                    #eee2d3
+                );
+
+            color: var(--gold-dark);
+
+            border-radius: 11px;
+
+            font-family: Georgia, serif;
+
+            font-size: 17px;
+        }
+
+        .product-info {
+            min-width: 0;
+        }
+
+        .product-name {
+            font-size: 13px;
+
+            font-weight: 650;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+        }
+
+        .product-type {
+            margin-top: 3px;
+
+            color: var(--muted);
+
+            font-size: 10px;
+        }
+
+        .views {
+            font-size: 14px;
+
+            font-weight: 700;
+        }
+
+        .views span {
+            color: var(--muted);
+
+            font-size: 10px;
+
+            font-weight: 400;
+        }
+
+        .popularity {
+            display: flex;
+            align-items: center;
+
+            gap: 10px;
+        }
+
+        .progress {
+            height: 6px;
+
+            flex: 1;
+
+            max-width: 145px;
+
+            background: #eeeae5;
+
+            border-radius: 50px;
+
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #ad8356,
+                    #d5b187
+                );
+
+            border-radius: inherit;
+
+            transition: width 0.7s ease;
+        }
+
+        .percentage {
+            width: 34px;
+
+            color: var(--muted);
+
+            font-size: 10px;
+
+            text-align: right;
+        }
+
+        /* =====================================
+           LOADING
+        ===================================== */
+
+        .loading {
+            min-height: 260px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-direction: column;
+
+            color: var(--muted);
+
+            font-size: 12px;
+        }
+
+        .spinner {
+            width: 25px;
+            height: 25px;
+
+            border: 2px solid #eee8df;
+
+            border-top-color: var(--gold);
+
+            border-radius: 50%;
+
+            animation: spin 0.8s linear infinite;
+
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error {
+            padding: 45px;
+
+            text-align: center;
+
+            color: #ad6868;
+
+            font-size: 13px;
+        }
+
+        .empty {
+            padding: 50px;
+
+            color: var(--muted);
+
+            text-align: center;
+
+            font-size: 13px;
+        }
+
+        /* =====================================
+           MOBILE
+        ===================================== */
+
+        @media (max-width: 900px) {
+
+            header {
+                padding: 0 20px;
+            }
+
+            main {
+                width: min(100% - 28px, 700px);
+
+                padding-top: 30px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-card {
+                padding: 20px;
+            }
+
+            #chart {
+                height: 330px;
+            }
+
+            .products-header {
+                align-items: flex-start;
+
+                flex-direction: column;
+            }
+
+            .controls {
+                width: 100%;
+            }
+
+            input {
+                width: 100%;
+            }
+
+            .table-head,
+            .product-row {
+                grid-template-columns:
+                    40px
+                    minmax(150px, 1fr)
+                    100px;
+            }
+
+            .table-head > div:last-child,
+            .product-row > div:last-child {
+                display: none;
+            }
+        }
+
+        @media (max-width: 550px) {
+
+            .connection {
+                display: none;
+            }
+
+            .brand-subtitle {
+                display: none;
+            }
+
+            main {
+                width: calc(100% - 20px);
+            }
+
+            .heading {
+                margin-bottom: 22px;
+            }
+
+            .heading h1 {
+                font-size: 32px;
+            }
+
+            .chart-header {
+                display: block;
+            }
+
+            .chart-badge {
+                width: max-content;
+
+                margin-top: 13px;
+            }
+
+            #chart {
+                height: 300px;
+            }
+
+            .table-head,
+            .product-row {
+                padding-left: 13px;
+                padding-right: 13px;
+            }
+
+            .product-icon {
+                width: 34px;
+                height: 34px;
+            }
+
+            .product {
+                gap: 8px;
+            }
+
+            .product-name {
+                max-width: 160px;
+            }
+
+            .views {
+                font-size: 12px;
+            }
+
+            .views span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+<header>
+
+    <div class="brand">
+
+        <div class="brand-logo">
+            ✦
+        </div>
+
+        <div>
+            <div class="brand-name">
+                Jewelry Analytics
+            </div>
+
+            <div class="brand-subtitle">
+                Store performance
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="connection">
+
+        <div class="connection-dot"></div>
+
+        API подключен
+
+    </div>
+
+</header>
+
+
+<main>
+
+    <!-- =================================
+         TITLE
+    ================================== -->
+
+    <section class="heading">
+
+        <h1>
+            Просмотры товаров
+        </h1>
+
+        <p>
+            Популярность украшений в вашем магазине
+        </p>
+
+    </section>
+
+
+    <!-- =================================
+         STATS
+    ================================== -->
+
+    <section class="stats">
+
+        <div class="stat">
+
+            <div class="stat-head">
+
+                <div class="stat-title">
+                    Товаров
+                </div>
+
+                <div class="stat-icon">
+                    ◇
+                </div>
+
+            </div>
+
+            <div
+                class="stat-value"
+                id="totalProducts"
+            >
+                —
+            </div>
+
+            <div class="stat-description">
+                Всего товаров в каталоге
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-head">
+
+                <div class="stat-title">
+                    Просмотры
+                </div>
+
+                <div class="stat-icon">
+                    ◉
+                </div>
+
+            </div>
+
+            <div
+                class="stat-value"
+                id="totalViews"
+            >
+                —
+            </div>
+
+            <div class="stat-description">
+                Суммарное количество просмотров
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-head">
+
+                <div class="stat-title">
+                    Лидер
+                </div>
+
+                <div class="stat-icon">
+                    ♢
+                </div>
+
+            </div>
+
+            <div
+                class="stat-value"
+                id="topViews"
+            >
+                —
+            </div>
+
+            <div
+                class="stat-description"
+                id="topProduct"
+            >
+                Самый популярный товар
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================
+         CHART
+    ================================== -->
+
+    <section class="chart-card">
+
+        <div class="chart-header">
+
+            <div class="chart-title">
+
+                <h2>
+                    Рейтинг просмотров
+                </h2>
+
+                <p>
+                    Топ товаров по количеству просмотров
+                </p>
+
+            </div>
+
+
+            <div class="chart-badge">
+
+                <div class="chart-badge-dot"></div>
+
+                Top 10
+
+            </div>
+
+        </div>
+
+
+        <div id="chart"></div>
+
+    </section>
+
+
+    <!-- =================================
+         PRODUCTS
+    ================================== -->
+
+    <section class="products-card">
+
+        <div class="products-header">
+
+            <div class="products-title">
+
+                <h2>
+                    Все товары
+                </h2>
+
+                <p id="productsCount">
+                    Загрузка...
+                </p>
+
+            </div>
+
+
+            <div class="controls">
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Поиск товара..."
+                >
+
+
+                <select id="sortSelect">
+
+                    <option value="views-desc">
+                        Просмотры ↓
+                    </option>
+
+                    <option value="views-asc">
+                        Просмотры ↑
+                    </option>
+
+                    <option value="name-asc">
+                        Название А–Я
+                    </option>
+
+                    <option value="name-desc">
+                        Название Я–А
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <div class="table">
+
+            <div class="table-head">
+
+                <div>
+                    #
+                </div>
+
+                <div>
+                    Товар
+                </div>
+
+                <div>
+                    Просмотры
+                </div>
+
+                <div>
+                    Популярность
+                </div>
+
+            </div>
+
+
+            <div id="productsList">
+
+                <div class="loading">
+
+                    <div class="spinner"></div>
+
+                    Загружаем товары...
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+    /* =====================================
+       API
+    ===================================== */
+
+    const API_URL =
+        'https://product-production-1794.up.railway.app/api/products';
+
+
+    let products = [];
+
+    let chart = null;
+
+
+    /* =====================================
+       FORMAT NUMBER
+    ===================================== */
+
+    function formatNumber(value) {
+
+        return new Intl.NumberFormat('ru-RU')
+            .format(Number(value) || 0);
+
+    }
+
+
+    /* =====================================
+       ESCAPE HTML
+    ===================================== */
+
+    function escapeHtml(value) {
+
+        return String(value)
+
+            .replaceAll('&', '&amp;')
+
+            .replaceAll('<', '&lt;')
+
+            .replaceAll('>', '&gt;')
+
+            .replaceAll('"', '&quot;')
+
+            .replaceAll("'", '&#039;');
+
+    }
+
+
+    /* =====================================
+       LOAD PRODUCTS
+    ===================================== */
+
+    async function loadProducts() {
+
+        try {
+
+            const response =
+                await fetch(API_URL);
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `HTTP ${response.status}`
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            /*
+             * Поддерживаем несколько вариантов
+             * ответа API.
+             */
+
+            const rawProducts =
+                Array.isArray(data)
+
+                    ? data
+
+                    : (
+                        data.products ||
+                        data.data ||
+                        []
+                    );
+
+
+            products =
+                rawProducts.map(product => ({
+
+                    name:
+                        product.name ||
+                        'Без названия',
+
+                    views_count:
+                        Number(
+                            product.views_count
+                        ) || 0
+
+                }));
+
+
+            updateStats();
+
+            renderChart();
+
+            renderProducts();
+
+        }
+
+
+        catch (error) {
+
+            console.error(
+                'API error:',
+                error
+            );
+
+
+            document
+                .getElementById('productsList')
+                .innerHTML = `
+
+                    <div class="error">
+
+                        Не удалось загрузить данные.
+
+                        <br><br>
+
+                        Проверь API и настройки CORS.
+
+                    </div>
+
+                `;
+
+
+            document
+                .getElementById('productsCount')
+                .textContent =
+                'Ошибка загрузки';
+
+        }
+
+    }
+
+
+    /* =====================================
+       STATS
+    ===================================== */
+
+    function updateStats() {
+
+        const totalProducts =
+            products.length;
+
+
+        const totalViews =
+            products.reduce(
+                (sum, product) =>
+                    sum + product.views_count,
+                0
+            );
+
+
+        const sorted =
+            [...products].sort(
+                (a, b) =>
+                    b.views_count -
+                    a.views_count
+            );
+
+
+        const top =
+            sorted[0];
+
+
+        document
+            .getElementById('totalProducts')
+            .textContent =
+            formatNumber(
+                totalProducts
+            );
+
+
+        document
+            .getElementById('totalViews')
+            .textContent =
+            formatNumber(
+                totalViews
+            );
+
+
+        if (top) {
+
+            document
+                .getElementById('topViews')
+                .textContent =
+                formatNumber(
+                    top.views_count
+                );
+
+
+            document
+                .getElementById('topProduct')
+                .textContent =
+                top.name;
+
+        }
+
+    }
+
+
+    /* =====================================
+       CHART
+    ===================================== */
+
+    function renderChart() {
+
+        const topProducts =
+            [...products]
+
+                .sort(
+                    (a, b) =>
+                        b.views_count -
+                        a.views_count
+                )
+
+                .slice(0, 10);
+
+
+        if (chart) {
+
+            chart.destroy();
+
+        }
+
+
+        const options = {
+
+            series: [
+
+                {
+                    name: 'Просмотры',
+
+                    data:
+                        topProducts.map(
+                            product =>
+                                product.views_count
+                        )
+                }
+
+            ],
+
+
+            chart: {
+
+                type: 'bar',
+
+                height: 390,
+
+                toolbar: {
+                    show: false
+                },
+
+                animations: {
+
+                    enabled: true,
+
+                    easing: 'easeinout',
+
+                    speed: 700
+                }
+            },
+
+
+            plotOptions: {
+
+                bar: {
+
+                    horizontal: true,
+
+                    borderRadius: 7,
+
+                    barHeight: '55%',
+
+                    distributed: false
+                }
+
+            },
+
+
+            colors: ['#b89163'],
+
+
+            fill: {
+
+                type: 'gradient',
+
+                gradient: {
+
+                    shade: 'light',
+
+                    type: 'horizontal',
+
+                    shadeIntensity: 0.15,
+
+                    opacityFrom: 1,
+
+                    opacityTo: 0.72,
+
+                    stops: [0, 100]
+                }
+
+            },
+
+
+            dataLabels: {
+
+                enabled: true,
+
+                textAnchor: 'start',
+
+                offsetX: 10,
+
+                style: {
+
+                    fontSize: '11px',
+
+                    fontWeight: 600,
+
+                    colors: ['#5f5143']
+                },
+
+                formatter: function(value) {
+
+                    return formatNumber(value);
+
+                }
+
+            },
+
+
+            xaxis: {
+
+                categories:
+                    topProducts.map(
+                        product =>
+                            product.name
+                    ),
+
+                labels: {
+
+                    style: {
+
+                        colors: '#918c85',
+
+                        fontSize: '10px'
+                    },
+
+                    formatter: function(value) {
+
+                        return formatNumber(value);
+
+                    }
+
+                },
+
+                axisBorder: {
+                    show: false
+                },
+
+                axisTicks: {
+                    show: false
+                }
+
+            },
+
+
+            yaxis: {
+
+                labels: {
+
+                    maxWidth: 190,
+
+                    style: {
+
+                        colors: '#4d4944',
+
+                        fontSize: '11px',
+
+                        fontWeight: 500
+                    }
+
+                }
+
+            },
+
+
+            grid: {
+
+                borderColor: '#eeeae5',
+
+                strokeDashArray: 4,
+
+                xaxis: {
+
+                    lines: {
+                        show: true
+                    }
+
+                },
+
+                yaxis: {
+
+                    lines: {
+                        show: false
+                    }
+
+                }
+
+            },
+
+
+            tooltip: {
+
+                theme: 'light',
+
+                y: {
+
+                    formatter: function(value) {
+
+                        return (
+                            formatNumber(value) +
+                            ' просмотров'
+                        );
+
+                    }
+
+                }
+
+            },
+
+
+            states: {
+
+                hover: {
+
+                    filter: {
+
+                        type: 'lighten',
+
+                        value: 0.08
+                    }
+
+                }
+
+            },
+
+
+            responsive: [
+
+                {
+
+                    breakpoint: 600,
+
+                    options: {
+
+                        chart: {
+
+                            height: 330
+
+                        },
+
+                        yaxis: {
+
+                            labels: {
+
+                                maxWidth: 120
+
+                            }
+
+                        },
+
+                        dataLabels: {
+
+                            enabled: false
+
+                        }
+
+                    }
+
+                }
+
+            ]
+
+        };
+
+
+        chart =
+            new ApexCharts(
+
+                document.getElementById('chart'),
+
+                options
+
+            );
+
+
+        chart.render();
+
+    }
+
+
+    /* =====================================
+       PRODUCTS
+    ===================================== */
+
+    function renderProducts() {
+
+        const list =
+            document.getElementById(
+                'productsList'
+            );
+
+
+        const search =
+            document
+                .getElementById(
+                    'searchInput'
+                )
+                .value
+                .toLowerCase()
+                .trim();
+
+
+        const sort =
+            document
+                .getElementById(
+                    'sortSelect'
+                )
+                .value;
+
+
+        let filtered =
+            products.filter(product =>
+
+                product.name
+                    .toLowerCase()
+                    .includes(search)
+
+            );
+
+
+        /* SORT */
+
+        if (sort === 'views-desc') {
+
+            filtered.sort(
+                (a, b) =>
+                    b.views_count -
+                    a.views_count
+            );
+
+        }
+
+
+        if (sort === 'views-asc') {
+
+            filtered.sort(
+                (a, b) =>
+                    a.views_count -
+                    b.views_count
+            );
+
+        }
+
+
+        if (sort === 'name-asc') {
+
+            filtered.sort(
+                (a, b) =>
+                    a.name.localeCompare(
+                        b.name,
+                        'ru'
+                    )
+            );
+
+        }
+
+
+        if (sort === 'name-desc') {
+
+            filtered.sort(
+                (a, b) =>
+                    b.name.localeCompare(
+                        a.name,
+                        'ru'
+                    )
+            );
+
+        }
+
+
+        document
+            .getElementById(
+                'productsCount'
+            )
+            .textContent =
+            `${filtered.length} из ${products.length} товаров`;
+
+
+        if (!filtered.length) {
+
+            list.innerHTML = `
+
+                <div class="empty">
+
+                    Товары не найдены
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        const maxViews =
+            Math.max(
+                ...products.map(
+                    product =>
+                        product.views_count
+                ),
+                1
+            );
+
+
+        list.innerHTML =
+
+            filtered.map(
+                (product, index) => {
+
+
+                    const percentage =
+                        Math.round(
+                            (
+                                product.views_count /
+                                maxViews
+                            ) * 100
+                        );
+
+
+                    const firstLetter =
+                        product.name
+                            .trim()
+                            .charAt(0)
+                            .toUpperCase();
+
+
+                    return `
+
+                        <div class="product-row">
+
+                            <div class="rank">
+
+                                ${index + 1}
+
+                            </div>
+
+
+                            <div class="product">
+
+                                <div class="product-icon">
+
+                                    ${escapeHtml(
+                                        firstLetter
+                                    )}
+
+                                </div>
+
+
+                                <div class="product-info">
+
+                                    <div class="product-name">
+
+                                        ${escapeHtml(
+                                            product.name
+                                        )}
+
+                                    </div>
+
+                                    <div class="product-type">
+
+                                        Украшение
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="views">
+
+                                ${formatNumber(
+                                    product.views_count
+                                )}
+
+                                <span>
+                                    просмотров
+                                </span>
+
+                            </div>
+
+
+                            <div class="popularity">
+
+                                <div class="progress">
+
+                                    <div
+                                        class="progress-fill"
+                                        style="
+                                            width:
+                                            ${percentage}%;
+                                        "
+                                    ></div>
+
+                                </div>
+
+
+                                <div class="percentage">
+
+                                    ${percentage}%
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+
+            ).join('');
+
+    }
+
+
+    /* =====================================
+       EVENTS
+    ===================================== */
+
+    document
+        .getElementById('searchInput')
+        .addEventListener(
+            'input',
+            renderProducts
+        );
+
+
+    document
+        .getElementById('sortSelect')
+        .addEventListener(
+            'change',
+            renderProducts
+        );
+
+
+    /* =====================================
+       START
+    ===================================== */
+
+    loadProducts();
+
+</script>
+
+</body>
+</html>
+```

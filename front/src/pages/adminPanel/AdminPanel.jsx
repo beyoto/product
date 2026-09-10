@@ -82,6 +82,7 @@ function AdminPanel() {
           <LogoutIcon fontSize="small" />
           Выйти
         </button>
+        <button onClick={() => navigate('/admin/analytics')}>Аналитика</button>
       </div>
 
       <button className="admin-panel__add-btn" onClick={() => navigate('/admin/add')}>

@@ -34,3 +34,10 @@ CREATE INDEX idx_products_category ON products(category);
 
 -- Индекс для быстрой выборки только активных товаров
 CREATE INDEX idx_products_is_active ON products(is_active);
+
+CREATE TABLE views_snapshots (
+  id SERIAL PRIMARY KEY,
+  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  views_count INTEGER NOT NULL,
+  captured_at TIMESTAMP DEFAULT NOW()
+);
