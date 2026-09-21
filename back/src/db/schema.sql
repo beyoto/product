@@ -41,3 +41,44 @@ CREATE TABLE views_snapshots (
   views_count INTEGER NOT NULL,
   captured_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TABLE products_asiamixx (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    category VARCHAR(20) NOT NULL CHECK (category IN (
+        'tshirt',      -- футболки
+        'shirt',       -- рубашки
+        'hoodie',      -- худи/свитшоты
+        'jacket',      -- куртки
+        'jeans',       -- джинсы
+        'pants',       -- брюки
+        'shorts',      -- шорты
+        'shoes',       -- обувь
+        'accessory',   -- аксессуары (ремни, кепки и т.д.)
+        'set'          -- комплекты (верх+низ)
+    )),
+    price NUMERIC(10, 2) NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    views_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+
+CREATE TABLE product_images_asiamixx (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL REFERENCES products_asiamixx(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+	position INTEGER DEFAULT 0,
+    sort_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+
+CREATE TABLE views_snapshots_asiamixx (
+  id SERIAL PRIMARY KEY,
+  product_id INTEGER NOT NULL REFERENCES products_asiamixx(id) ON DELETE CASCADE,
+  views_count INTEGER NOT NULL,
+  captured_at TIMESTAMP DEFAULT NOW()
+);

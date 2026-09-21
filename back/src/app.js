@@ -13,6 +13,12 @@ app.use(express.json()); // Позволяет читать JSON из тела �
 const productRouter = require('./routes/products');
 app.use('/api/products', productRouter)
 
+const productAsiaMixxRouter = require('./routes/products_asiamixx')
+app.use('/api/products_asiamixx', productAsiaMixxRouter)
+
+const productImagesAsiamixxRouter = require('./routes/productImages_asiamixx');
+app.use('/api/products_asiamixx', productImagesAsiamixxRouter);
+
 // Роуты гостей (приглашение) — отдельный проект/фича, не связан с товарами
 const guestRouter = require('./routes/guests');
 app.use('/api/guests', guestRouter);
@@ -31,6 +37,15 @@ startViewsSnapshotJob();
 
 const analyticsRouter = require('./routes/analytics');
 app.use('/api/analytics', analyticsRouter);
+
+const startViewsSnapshotJobAsiamixx = require('./jobs/viewsSnapshotJob_asiamixx');
+startViewsSnapshotJobAsiamixx();
+
+const analyticsAsiamixxRouter = require('./routes/analytics_asiamixx');
+app.use('/api/analytics_asiamixx', analyticsAsiamixxRouter);
+
+//////////////////////////////////////////////////////////////////////////
+
 
 // Проверка живости сервера и связи с базой данных (используется для отладки/мониторинга)
 app.get('/api/health', async (req, res) => {
