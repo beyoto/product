@@ -19,6 +19,12 @@ app.use('/api/products_asiamixx', productAsiaMixxRouter)
 const productImagesAsiamixxRouter = require('./routes/productImages_asiamixx');
 app.use('/api/products_asiamixx', productImagesAsiamixxRouter);
 
+const productEtnoRouter = require('./routes/products_etno');
+app.use('/api/products_etno', productEtnoRouter);
+
+const productImagesEtnoRouter = require('./routes/productImages_etno');
+app.use('/api/products_etno', productImagesEtnoRouter);
+
 // Роуты гостей (приглашение) — отдельный проект/фича, не связан с товарами
 const guestRouter = require('./routes/guests');
 app.use('/api/guests', guestRouter);
@@ -43,6 +49,12 @@ startViewsSnapshotJobAsiamixx();
 
 const analyticsAsiamixxRouter = require('./routes/analytics_asiamixx');
 app.use('/api/analytics_asiamixx', analyticsAsiamixxRouter);
+
+const startViewsSnapshotJobEtno = require('./jobs/viewsSnapshotJob_etno');
+startViewsSnapshotJobEtno();
+
+const analyticsEtnoRouter = require('./routes/analytics_etno');
+app.use('/api/analytics_etno', analyticsEtnoRouter);
 
 //////////////////////////////////////////////////////////////////////////
 
