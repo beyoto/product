@@ -25,6 +25,12 @@ app.use('/api/products_etno', productEtnoRouter);
 const productImagesEtnoRouter = require('./routes/productImages_etno');
 app.use('/api/products_etno', productImagesEtnoRouter);
 
+const productMyrzaBrandsRouter = require('./routes/products_myrzaBrands');
+app.use('/api/products_myrzaBrands', productMyrzaBrandsRouter);
+
+const productImagesMyrzaBrandsRouter = require('./routes/productImages_myrzaBrands');
+app.use('/api/products_myrzaBrands', productImagesMyrzaBrandsRouter);
+
 // Роуты гостей (приглашение) — отдельный проект/фича, не связан с товарами
 const guestRouter = require('./routes/guests');
 app.use('/api/guests', guestRouter);
@@ -55,6 +61,12 @@ startViewsSnapshotJobEtno();
 
 const analyticsEtnoRouter = require('./routes/analytics_etno');
 app.use('/api/analytics_etno', analyticsEtnoRouter);
+
+const startViewsSnapshotJobMyrzaBrands = require('./jobs/viewsSnapshotJob_myrzaBrands');
+startViewsSnapshotJobMyrzaBrands();
+
+const analyticsMyrzaBrandsRouter = require('./routes/analytics_myrzaBrands');
+app.use('/api/analytics_myrzaBrands', analyticsMyrzaBrandsRouter);
 
 //////////////////////////////////////////////////////////////////////////
 
