@@ -29,7 +29,7 @@ function AdminPanel() {
   const loadProducts = () => {
     setLoading(true);
     api
-      .get('/products_myrzaBrands/admin/all')
+      .get('/products/admin/all')
       .then((res) => setProducts(res.data))
       .catch((err) => {
         console.error(err);
@@ -53,7 +53,7 @@ function AdminPanel() {
 
   const toggleActive = async (product) => {
     try {
-      await api.put(`/products_myrzaBrands/${product.id}`, { is_active: !product.is_active });
+      await api.put(`/products/${product.id}`, { is_active: !product.is_active });
       loadProducts();
     } catch (err) {
       console.error(err);
@@ -66,7 +66,7 @@ function AdminPanel() {
     if (!confirmed) return;
 
     try {
-      await api.delete(`/products_myrzaBrands/${product.id}`);
+      await api.delete(`/products/${product.id}`);
       loadProducts();
     } catch (err) {
       console.error(err);

@@ -35,7 +35,7 @@ function EditProduct() {
 
   useEffect(() => {
     api
-      .get(`/products_myrzaBrands/${id}`)
+      .get(`/products/${id}`)
       .then((res) => {
         const product = res.data;
 
@@ -85,7 +85,7 @@ function EditProduct() {
     setSubmitting(true);
 
     try {
-      await api.put(`/products_myrzaBrands/${id}`, {
+      await api.put(`/products/${id}`, {
         name: form.name,
         description: form.description,
         price: parseFloat(form.price),
@@ -99,7 +99,7 @@ function EditProduct() {
           formData.append('images', file);
         });
 
-        await api.post(`/products_myrzaBrands/${id}/images`, formData, {
+        await api.post(`/products/${id}/images`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },

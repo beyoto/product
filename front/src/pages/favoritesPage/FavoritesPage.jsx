@@ -18,7 +18,7 @@ function FavoritesPage() {
 
   useEffect(() => {
     api
-      .get('/products_myrzaBrands')
+      .get('/products')
       .then((res) => {
         setAllProducts(res.data);
         syncFavorites(res.data);

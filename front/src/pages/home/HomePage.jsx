@@ -24,7 +24,7 @@ function HomePage() {
     if (sort) params.sort = sort;
 
     api
-      .get('/products_myrzaBrands', { params })
+      .get('/products', { params })
       .then((res) => {
         console.log('Ответ API:', res.data);
         setProducts(res.data);
