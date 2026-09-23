@@ -10,7 +10,7 @@ const pool = require('../config/db');
 function uploadToCloudinary(buffer) {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: 'jewelry_shop' },
+      { folder: 'myrzaBrands_shop' },
       (error, result) => {
         if (error) reject(error);
         else resolve(result);
