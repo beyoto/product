@@ -38,7 +38,7 @@ function AdminAnalytics() {
   const [compareIds, setCompareIds] = useState([]);
 
   useEffect(() => {
-    api.get('/products/admin/all').then((res) => {
+    api.get('/products_myrzaBrands/admin/all').then((res) => {
       setProducts(res.data);
     });
   }, []);
@@ -50,13 +50,13 @@ function AdminAnalytics() {
 
     let request;
     if (isComparing) {
-      request = api.get('/analytics/views-compare', {
+      request = api.get('/analytics_myrzaBrands/views-compare', {
         params: { productIds: compareIds.join(','), range },
       });
     } else if (selectedProductId === 'all') {
-      request = api.get('/analytics/views-summary', { params: { range } });
+      request = api.get('/analytics_myrzaBrands/views-summary', { params: { range } });
     } else {
-      request = api.get('/analytics/views', { params: { productId: selectedProductId, range } });
+      request = api.get('/analytics_myrzaBrands/views', { params: { productId: selectedProductId, range } });
     }
 
     request

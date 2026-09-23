@@ -55,7 +55,7 @@ function AddProduct() {
 
     try {
       // 1. Создаём товар
-      const productRes = await api.post('/products', {
+      const productRes = await api.post('/products_myrzaBrands', {
         name: form.name,
         description: form.description,
         price: parseFloat(form.price),
@@ -73,7 +73,7 @@ function AddProduct() {
         });
 
         await api.post(
-          `/products/${newProductId}/images`,
+          `/products_myrzaBrands/${newProductId}/images`,
           formData,
           {
             headers: {

@@ -50,7 +50,7 @@ function ProductPage() {
     setError(null);
 
     api
-      .get(`/products/${id}`)
+      .get(`/products_myrzaBrands/${id}`)
       .then((res) => {
         setProduct(res.data);
         setActiveImage(0);
