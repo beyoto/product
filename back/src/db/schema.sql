@@ -160,4 +160,32 @@ CREATE TABLE views_snapshots_myrzaBrands (
     captured_at TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE products_crowncarat (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    category VARCHAR(20) NOT NULL CHECK (category IN ('gold', 'silver', 'diamond')),
+    price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    views_count INTEGER NOT NULL DEFAULT 0 CHECK (views_count >= 0),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE product_images_crowncarat (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL REFERENCES products_crowncarat (id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    position INTEGER NOT NULL DEFAULT 0,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE views_snapshots_crowncarat (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL REFERENCES products_crowncarat (id) ON DELETE CASCADE,
+    views_count INTEGER NOT NULL CHECK (views_count >= 0),
+    captured_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 

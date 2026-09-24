@@ -31,6 +31,12 @@ app.use('/api/products_myrzaBrands', productMyrzaBrandsRouter);
 const productImagesMyrzaBrandsRouter = require('./routes/productImages_myrzaBrands');
 app.use('/api/products_myrzaBrands', productImagesMyrzaBrandsRouter);
 
+const productCrownCaratRouter = require('./routes/products_crowncarat');
+app.use('/api/products_crowncarat', productCrownCaratRouter);
+
+const productImagesCrownCaratRouter = require('./routes/productImages_crowncarat');
+app.use('/api/products_crowncarat', productImagesCrownCaratRouter);
+
 // Роуты гостей (приглашение) — отдельный проект/фича, не связан с товарами
 const guestRouter = require('./routes/guests');
 app.use('/api/guests', guestRouter);
@@ -67,6 +73,12 @@ startViewsSnapshotJobMyrzaBrands();
 
 const analyticsMyrzaBrandsRouter = require('./routes/analytics_myrzaBrands');
 app.use('/api/analytics_myrzaBrands', analyticsMyrzaBrandsRouter);
+
+const startViewsSnapshotJobCrownCarat = require('./jobs/viewsSnapshotJob_crowncarat');
+startViewsSnapshotJobCrownCarat();
+
+const analyticsCrownCaratRouter = require('./routes/analytics_crowncarat');
+app.use('/api/analytics_crowncarat', analyticsCrownCaratRouter);
 
 //////////////////////////////////////////////////////////////////////////
 
