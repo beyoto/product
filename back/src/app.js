@@ -37,6 +37,16 @@ app.use('/api/products_crowncarat', productCrownCaratRouter);
 const productImagesCrownCaratRouter = require('./routes/productImages_crowncarat');
 app.use('/api/products_crowncarat', productImagesCrownCaratRouter);
 
+const productBahaAutoRouter = require('./routes/products_baha_auto');
+const productImagesBahaAutoRouter = require('./routes/productImages_baha_auto');
+app.use('/api/products_baha_auto', productBahaAutoRouter);
+app.use('/api/products_baha_auto', productImagesBahaAutoRouter);
+
+const analyticsBahaAutoRouter = require('./routes/analytics_baha_auto');
+const startViewsSnapshotJobBahaAuto = require('./jobs/viewsSnapshotJob_baha_auto');
+app.use('/api/analytics_baha_auto', analyticsBahaAutoRouter);
+startViewsSnapshotJobBahaAuto();
+
 // Роуты гостей (приглашение) — отдельный проект/фича, не связан с товарами
 const guestRouter = require('./routes/guests');
 app.use('/api/guests', guestRouter);
