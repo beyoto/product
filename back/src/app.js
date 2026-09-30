@@ -90,6 +90,16 @@ startViewsSnapshotJobCrownCarat();
 const analyticsCrownCaratRouter = require('./routes/analytics_crowncarat');
 app.use('/api/analytics_crowncarat', analyticsCrownCaratRouter);
 
+const productErnisCostumesRouter = require('./routes/products_ernis_costumes');
+const productImagesErnisCostumesRouter = require('./routes/productImages_ernis_costumes');
+app.use('/api/products_ernis_costumes', productErnisCostumesRouter);
+app.use('/api/products_ernis_costumes', productImagesErnisCostumesRouter);
+
+const analyticsErnisCostumesRouter = require('./routes/analytics_ernis_costumes');
+const startViewsSnapshotJobErnisCostumes = require('./jobs/viewsSnapshotJob_ernis_costumes');
+app.use('/api/analytics_ernis_costumes', analyticsErnisCostumesRouter);
+startViewsSnapshotJobErnisCostumes();
+
 //////////////////////////////////////////////////////////////////////////
 
 
