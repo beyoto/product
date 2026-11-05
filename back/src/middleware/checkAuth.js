@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db.js');
 const { isStore } = require('../config/stores.js');
+const { recordSecurityEvent } = require('../utils/securityLog.js');
 
 const STORE_ROUTE = /^\/api\/(?:products|analytics)(?:_([A-Za-z0-9_]+))?$/;
 
@@ -20,14 +21,18 @@ async function loadAdmin(req) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return { status: 401, error: 'No token provided' };
+    return { status: 401, error: 'No token provided', event: 'token_missing' };
   }
 
   let decoded;
   try {
     decoded = jwt.verify(authHeader.split(' ')[1], process.env.JWT_SECRET);
   } catch (err) {
-    return { status: 401, error: 'Invalid or expired token' };
+    return {
+      status: 401,
+      error: 'Invalid or expired token',
+      event: err.name === 'TokenExpiredError' ? 'token_expired' : 'token_invalid',
+    };
   }
 
   const result = await pool.query(
@@ -37,23 +42,40 @@ async function loadAdmin(req) {
   const admin = result.rows[0];
 
   if (!admin || !admin.is_active) {
-    return { status: 401, error: 'Invalid or expired token' };
+    return { status: 401, error: 'Invalid or expired token', event: 'token_invalid' };
   }
 
   return { admin };
 }
 
-function guard(isAllowed) {
+function guard(isAllowed, { audit = false } = {}) {
   return async (req, res, next) => {
     try {
-      const { admin, status, error } = await loadAdmin(req);
-      if (!admin) return res.status(status).json({ error });
+      const store = storeFromRequest(req);
+      const { admin, status, error, event } = await loadAdmin(req);
+
+      if (!admin) {
+        recordSecurityEvent(req, event, { store, status });
+        return res.status(status).json({ error });
+      }
 
       if (!isAllowed(admin, req)) {
+        recordSecurityEvent(req, 'access_denied', { username: admin.username, store, status: 403 });
         return res.status(403).json({ error: 'Forbidden' });
       }
 
       req.admin = admin;
+
+      if (audit && req.method !== 'GET') {
+        res.on('finish', () => {
+          recordSecurityEvent(req, 'admin_action', {
+            username: admin.username,
+            store,
+            status: res.statusCode,
+          });
+        });
+      }
+
       next();
     } catch (err) {
       console.error(err);
@@ -69,7 +91,7 @@ const checkAuth = guard((admin, req) => {
   if (isSuperAdmin(admin)) return true;
   const store = storeFromRequest(req);
   return store !== null && admin.stores.includes(store);
-});
+}, { audit: true });
 
 // Любой вошедший админ.
 const requireAdmin = guard(() => true);

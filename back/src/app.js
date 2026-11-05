@@ -6,6 +6,9 @@ const pool = require('./config/db.js'); // Подключение к PostgreSQL
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Railway стоит перед сервером как прокси, без этого req.ip будет адресом прокси.
+app.set('trust proxy', 1);
+
 app.use(cors());
 app.use(express.json()); // Позволяет читать JSON из тела запроса (req.body)
 
@@ -136,7 +139,16 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// Журнал безопасности: таблица создаётся до приёма запросов
+const ensureSecurityEvents = require('./db/ensureSecurityEvents');
+const startSecurityEventsCleanup = require('./jobs/securityEventsCleanup');
+startSecurityEventsCleanup();
+
 // Запуск сервера на указанном порту
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+ensureSecurityEvents()
+  .catch((err) => console.error('Security events table setup failed:', err.message))
+  .finally(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  });

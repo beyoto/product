@@ -282,3 +282,18 @@ CREATE TABLE views_snapshots_nova_flowers (
     views_count INTEGER NOT NULL CHECK (views_count >= 0),
     captured_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+-- Журнал безопасности. На сервере создаётся автоматически: src/db/ensureSecurityEvents.js
+CREATE TABLE IF NOT EXISTS security_events (
+    id BIGSERIAL PRIMARY KEY,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    severity VARCHAR(10) NOT NULL CHECK (severity IN ('info', 'warning', 'critical')),
+    event_type VARCHAR(50) NOT NULL,
+    username VARCHAR(50),
+    store VARCHAR(50),
+    ip VARCHAR(64),
+    user_agent VARCHAR(300),
+    method VARCHAR(10),
+    path VARCHAR(200),
+    status INTEGER,
+    details JSONB NOT NULL DEFAULT '{}'
+);

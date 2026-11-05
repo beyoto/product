@@ -8,11 +8,21 @@ const STORES = {
   myrzaBrands: { label: 'Myrza Brands', url: 'https://myrza-brands.vercel.app' },
   crowncarat: { label: 'Crown Carat', url: 'https://crown-carat.vercel.app' },
   // Baha 777 и Auto HAYK используют одни и те же роуты и таблицы.
-  baha_auto: { label: 'Baha 777 / Auto HAYK', url: 'https://baha-777.vercel.app' },
+  baha_auto: { label: 'Baha 777 / Auto HAYK', url: 'https://baha-777.vercel.app', extraOrigins: ['https://hayk-auto.vercel.app'] },
   ernis_costumes: { label: 'Ernis Costumes', url: 'https://ernis-costumes.vercel.app' },
   nova_flowers: { label: 'Nova Flowers', url: null },
 };
 
 const isStore = (key) => Object.hasOwn(STORES, key);
 
-module.exports = { STORES, isStore };
+// Для журнала: с какого сайта пришёл запрос. Заголовок Origin можно подделать,
+// поэтому для проверки доступа он не используется.
+const ORIGINS = new Map(
+  Object.entries(STORES).flatMap(([key, store]) => (
+    [store.url, ...(store.extraOrigins || [])].filter(Boolean).map((origin) => [origin, key])
+  ))
+);
+
+const storeFromOrigin = (origin) => ORIGINS.get(origin) || null;
+
+module.exports = { STORES, isStore, storeFromOrigin };

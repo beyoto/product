@@ -4,7 +4,19 @@ const bcrypt = require('bcrypt');
 const pool = require('../config/db.js');
 const { STORES, isStore } = require('../config/stores.js');
 const { requireSuperAdmin } = require('../middleware/checkAuth');
-const { logEvent } = require('../utils/logger.js');
+const { recordSecurityEvent } = require('../utils/securityLog.js');
+
+const EVENT_FILTERS = {
+  severity: (value) => ['info', 'warning', 'critical'].includes(value),
+  event_type: (value) => /^[a-z_]{1,50}$/.test(value),
+  store: isStore,
+  username: (value) => value.length <= 50,
+  ip: (value) => value.length <= 64,
+};
+const ALERT_TYPES = [
+  'login_failed', 'login_blocked', 'login_success_after_failures',
+  'access_denied', 'token_invalid', 'register_probe',
+];
 
 const ADMIN_FIELDS = 'id, username, role, stores, is_active, created_at';
 
@@ -73,7 +85,11 @@ router.post('/admins', async (req, res) => {
       [username, passwordHash, stores]
     );
 
-    logEvent('admin_created', { by: req.admin.username, username, stores });
+    recordSecurityEvent(req, 'admin_created', {
+      username: req.admin.username,
+      status: 201,
+      details: { target: username, stores },
+    });
     res.status(201).json(result.rows[0]);
   } catch (err) {
     if (err.code === '23505') {
@@ -112,12 +128,15 @@ router.patch('/admins/:id', async (req, res) => {
       [stores ?? null, isActive ?? null, passwordHash, admin.id]
     );
 
-    logEvent('admin_updated', {
-      by: req.admin.username,
-      id: admin.id,
-      stores,
-      is_active: isActive,
-      password_changed: password !== undefined,
+    recordSecurityEvent(req, 'admin_updated', {
+      username: req.admin.username,
+      status: 200,
+      details: {
+        target: result.rows[0].username,
+        stores,
+        is_active: isActive,
+        password_changed: password !== undefined,
+      },
     });
     res.json(result.rows[0]);
   } catch (err) {
@@ -134,8 +153,84 @@ router.delete('/admins/:id', async (req, res) => {
 
     await pool.query('DELETE FROM admins WHERE id = $1', [admin.id]);
 
-    logEvent('admin_deleted', { by: req.admin.username, id: admin.id });
+    recordSecurityEvent(req, 'admin_deleted', {
+      username: req.admin.username,
+      status: 200,
+      details: { target_id: admin.id },
+    });
     res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /api/super/events — журнал безопасности, новые записи первыми
+router.get('/events', async (req, res) => {
+  try {
+    const where = [];
+    const params = [];
+
+    for (const [field, isValid] of Object.entries(EVENT_FILTERS)) {
+      const value = req.query[field];
+      if (value === undefined || value === '') continue;
+      if (typeof value !== 'string' || !isValid(value)) {
+        return res.status(400).json({ error: `Invalid ${field}` });
+      }
+      params.push(value);
+      where.push(`${field} = $${params.length}`);
+    }
+
+    if (req.query.before !== undefined) {
+      if (!/^\d{1,18}$/.test(req.query.before)) {
+        return res.status(400).json({ error: 'Invalid before' });
+      }
+      params.push(req.query.before);
+      where.push(`id < $${params.length}`);
+    }
+
+    const limit = Math.min(Number.parseInt(req.query.limit, 10) || 50, 200);
+    params.push(limit);
+
+    const result = await pool.query(
+      `SELECT * FROM security_events
+       ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
+       ORDER BY id DESC
+       LIMIT $${params.length}`,
+      params
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /api/super/events/summary — сводка за 24 часа
+router.get('/events/summary', async (req, res) => {
+  try {
+    const [counts, topIps] = await Promise.all([
+      pool.query(
+        `SELECT event_type, COUNT(*)::int AS count
+         FROM security_events
+         WHERE created_at > NOW() - INTERVAL '24 hours'
+         GROUP BY event_type`
+      ),
+      pool.query(
+        `SELECT ip, COUNT(*)::int AS count, MAX(created_at) AS last_seen
+         FROM security_events
+         WHERE created_at > NOW() - INTERVAL '24 hours' AND event_type = ANY($1)
+         GROUP BY ip
+         ORDER BY count DESC
+         LIMIT 5`,
+        [ALERT_TYPES]
+      ),
+    ]);
+
+    res.json({
+      counts: Object.fromEntries(counts.rows.map((row) => [row.event_type, row.count])),
+      topIps: topIps.rows,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
