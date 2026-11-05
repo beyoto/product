@@ -51,9 +51,13 @@ startViewsSnapshotJobBahaAuto();
 const guestRouter = require('./routes/guests');
 app.use('/api/guests', guestRouter);
 
-// Роуты авторизации: регистрация и логин админа, выдача JWT-токена
+// Роуты авторизации: логин админа, выдача JWT-токена
 const authRouter = require('./routes/auth');
 app.use('/api/auth', authRouter);
+
+// Суперадминка: управление админами магазинов
+const superRouter = require('./routes/super');
+app.use('/api/super', superRouter);
 
 // Роуты для фото товаров: загрузка в Cloudinary и удаление конкретного фото
 const productImagesRouter = require('./routes/productImages');
@@ -99,6 +103,16 @@ const analyticsErnisCostumesRouter = require('./routes/analytics_ernis_costumes'
 const startViewsSnapshotJobErnisCostumes = require('./jobs/viewsSnapshotJob_ernis_costumes');
 app.use('/api/analytics_ernis_costumes', analyticsErnisCostumesRouter);
 startViewsSnapshotJobErnisCostumes();
+
+const productNovaFlowersRouter = require('./routes/products_nova_flowers');
+const productImagesNovaFlowersRouter = require('./routes/productImages_nova_flowers');
+app.use('/api/products_nova_flowers', productNovaFlowersRouter);
+app.use('/api/products_nova_flowers', productImagesNovaFlowersRouter);
+
+const analyticsNovaFlowersRouter = require('./routes/analytics_nova_flowers');
+const startViewsSnapshotJobNovaFlowers = require('./jobs/viewsSnapshotJob_nova_flowers');
+app.use('/api/analytics_nova_flowers', analyticsNovaFlowersRouter);
+startViewsSnapshotJobNovaFlowers();
 
 //////////////////////////////////////////////////////////////////////////
 

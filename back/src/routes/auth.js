@@ -4,35 +4,10 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db.js');
 const { logEvent } = require('../utils/logger.js')
+const { requireAdmin } = require('../middleware/checkAuth');
 
-// POST /api/auth/register — создать админа (используешь один раз вручную, потом можно убрать/защитить)
-router.post('/register', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-
-    if (!username || !password) {
-      return res.status(400).json({ error: 'username and password are required' });
-    }
-
-    const existing = await pool.query('SELECT id FROM admins WHERE username = $1', [username]);
-    if (existing.rows.length > 0) {
-      return res.status(409).json({ error: 'Username already taken' });
-    }
-
-    const password_hash = await bcrypt.hash(password, 10);
-
-    const result = await pool.query(
-      'INSERT INTO admins (username, password_hash) VALUES ($1, $2) RETURNING id, username',
-      [username, password_hash]
-    );
-
-    res.status(201).json(result.rows[0]);
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+// Открытой регистрации нет: админов создаёт суперадмин (/api/super/admins),
+// а самого суперадмина — скрипт src/scripts/createSuperAdmin.js.
 
 // POST /api/auth/login — получить JWT токен
 router.post('/login', async (req, res) => {
@@ -51,7 +26,7 @@ router.post('/login', async (req, res) => {
     const admin = result.rows[0];
     const validPassword = await bcrypt.compare(password, admin.password_hash);
 
-    if (!validPassword) {
+    if (!validPassword || !admin.is_active) {
       logEvent('login_failed', { username });
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -70,6 +45,12 @@ router.post('/login', async (req, res) => {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
+});
+
+// GET /api/auth/me — кто вошёл и к каким магазинам есть доступ
+router.get('/me', requireAdmin, (req, res) => {
+  const { id, username, role, stores } = req.admin;
+  res.json({ id, username, role, stores });
 });
 
 module.exports = router;

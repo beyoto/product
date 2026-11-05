@@ -13,6 +13,7 @@ import EditProduct from './pages/editProduct/EditProduct.jsx';
 import SplashScreen from './components/SplashScreen.jsx';
 import ContactsPage from './pages/contactPage/ContactsPage.jsx';
 import AdminAnalytics from './pages/adminAnalytics/AdminAnalytics.jsx';
+import SuperAdmin from './pages/superAdmin/SuperAdmin.jsx';
 
 const App = () => {
   return (
@@ -26,6 +27,7 @@ const App = () => {
               <Route path='/favorites' element={<FavoritesPage />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path='/contacts' element={<ContactsPage />} />
+              <Route path="/super" element={<SuperAdmin />} />
               <Route
                 path="/admin"
                 element={

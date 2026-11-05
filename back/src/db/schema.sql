@@ -3,6 +3,9 @@ CREATE TABLE admins (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'store_admin' CHECK (role IN ('super_admin', 'store_admin')),
+    stores TEXT[] NOT NULL DEFAULT '{}',
+    is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -241,4 +244,41 @@ CREATE TABLE views_snapshots_baha_auto (
     product_id INTEGER NOT NULL REFERENCES products_baha_auto (id) ON DELETE CASCADE,
     views_count INTEGER NOT NULL,
     captured_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE products_nova_flowers (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    category VARCHAR(30) NOT NULL CHECK (
+        category IN (
+            'roses',
+            'tulips',
+            'peonies',
+            'lilies',
+            'chrysanthemums',
+            'bouquets'
+        )
+    ),
+    price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    views_count INTEGER NOT NULL DEFAULT 0 CHECK (views_count >= 0),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE product_images_nova_flowers (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL REFERENCES products_nova_flowers (id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    position INTEGER NOT NULL DEFAULT 0,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE views_snapshots_nova_flowers (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL REFERENCES products_nova_flowers (id) ON DELETE CASCADE,
+    views_count INTEGER NOT NULL CHECK (views_count >= 0),
+    captured_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
