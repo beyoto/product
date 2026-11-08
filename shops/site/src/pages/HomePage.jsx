@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import api from '../site.js';
 import { useSite } from '../SiteContext.jsx';
 import Header from '../components/Header.jsx';
-import HeroCarousel from '../components/HeroCarousel.jsx';
 import TrustBadges from '../components/TrustBadges.jsx';
 import ProductCard from '../components/ProductCard.jsx';
 import Footer from '../components/Footer.jsx';
@@ -20,6 +19,7 @@ function HomePage() {
 
   const [filters, setFilters] = useState(emptyFilters);
   const [sort, setSort] = useState('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [products, setProducts] = useState([]);
   const [loadedRequest, setLoadedRequest] = useState(null);
   const [error, setError] = useState('');
@@ -27,8 +27,8 @@ function HomePage() {
   const loading = loadedRequest !== requestKey;
 
   useEffect(() => {
-    document.title = info.tagline ? `${name} | ${info.tagline}` : name;
-  }, [name, info.tagline]);
+    document.title = info.seoTitle || (info.tagline ? `${name} — ${info.tagline}` : name);
+  }, [name, info.seoTitle, info.tagline]);
 
   useEffect(() => {
     let active = true;
@@ -66,19 +66,29 @@ function HomePage() {
     <>
       <div className="home-page">
         <Header />
-        <HeroCarousel products={products} />
         <TrustBadges />
 
-        <section className="catalog-panel" id="catalog">
+        <section className={`catalog-panel${filtersOpen ? ' catalog-panel--open' : ''}`} id="catalog">
           <div className="catalog-panel__heading">
             <div>
               <span>{type.label.toUpperCase()}</span>
               <h2>{type.catalogTitle}</h2>
             </div>
-            <button type="button" onClick={resetFilters}>Сбросить фильтры</button>
+            <div className="catalog-panel__buttons">
+              <button
+                type="button"
+                className="catalog-panel__toggle"
+                aria-expanded={filtersOpen}
+                aria-controls="catalog-filters"
+                onClick={() => setFiltersOpen((open) => !open)}
+              >
+                {filtersOpen ? 'Скрыть фильтры' : 'Фильтры'}
+              </button>
+              <button type="button" onClick={resetFilters}>Сбросить</button>
+            </div>
           </div>
 
-          <div className="catalog-panel__filters">
+          <div className="catalog-panel__filters" id="catalog-filters">
             <label>
               <span>Категория</span>
               <select name="category" value={filters.category} onChange={setFilter}>

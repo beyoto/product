@@ -26,7 +26,7 @@
 
 ### Конструктор: где что
 - `back/src/config/siteTypes.js` — **типы магазинов** (цветы, одежда, обувь, ювелирка, двери, авто, мебель, косметика,
-  электроника, универсальный): категории, особые поля товара, тексты баннера и преимуществ; и **цветовые темы**.
+  электроника, универсальный): категории, особые поля товара, заголовок каталога; и **цветовые темы**. Главная: шапка → преимущества (3 фразы, редактируются в панели) → каталог; карусель убрана 2026-11-09.
   Это единый источник: бэк проверяет по нему товары, панель рисует форму создания, сайт — форму товара, фильтры и характеристики.
   - Поле: `text | number | select | multiselect`; `required`, `unit`, `integer`, `min/max`, `card` (на карточке), `filter` (фильтр каталога; только select/multiselect).
   - **`value` у категорий и опций хранится в базе — не переименовывать**; `label` менять можно. Новые поля/опции добавлять можно.
@@ -39,6 +39,19 @@
 - Фото — Cloudinary, папка `sites/<slug>`, до 10 на товар. При удалении магазина фото в Cloudinary остаются.
 - Тема: `shops/site/src/theme.js` пишет цвета в CSS-переменные (`--color-gold` = акцент, `--color-ivory` = текст, `--header-*`, `--footer-*`).
   CSS шаблона — копия вёрстки nova, все цвета через переменные/`color-mix`. Новую тему добавлять только в `THEMES`.
+
+### SEO и превью ссылок (только магазины конструктора)
+- Сайт — SPA, а соцсети (WhatsApp, Telegram, VK, Facebook) не выполняют JS. Поэтому `shops/middleware.js`
+  (Vercel Routing Middleware) для `/<slug>/` и `/<slug>/product/<id>` берёт `/_app/index.html` и вписывает
+  title, description, canonical, Open Graph, JSON-LD Product. Логика — `shops/seo/render.js`.
+  Отдаёт `robots.txt`, `sitemap.xml` (индекс по `GET /api/sites`) и `/<slug>/sitemap.xml`.
+  При любой ошибке/таймауте API (2.5 с) — `next()`, сайт открывается без тегов. Старые магазины не трогает (`legacyStores.js`).
+- Данные: `GET /api/sites/<slug>/share?product=<id>` (не считает просмотры) и `GET /api/sites/<slug>/sitemap`.
+- SEO товара — колонка `site_products.seo` `{title, description}`; SEO главной — `sites.info.seoTitle/seoDescription/shareImage`.
+  Пусто → подставляется из названия/описания/фото. Картинки Cloudinary обрезаются под 1200×630 через URL.
+  Формулы подстановки продублированы в превью (`shops/site/src/components/SeoFields.jsx`, `admin/src/pages/Sites.jsx`) — менять вместе.
+- Список старых магазинов теперь в трёх местах: `shops/stores/`, `shops/vercel.json`, `shops/legacyStores.js` (+ `RESERVED_SLUGS` на бэке);
+  сборка проверяет совпадение.
 
 ## shops/ — старые магазины, как устроено
 

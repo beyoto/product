@@ -153,27 +153,40 @@
   padding: var(--space-xl) 0;
 }
 
-/* The hero intentionally breaks out of the page gutter. */
-.home-page > .hero-carousel {
-  width: calc(100% + (var(--space-md) * 2));
-  margin-left: calc(var(--space-md) * -1);
-  margin-right: calc(var(--space-md) * -1);
+/* На телефоне фильтры свёрнуты, чтобы товары были видны сразу */
+.catalog-panel__buttons {
+  display: flex;
+  gap: 8px;
 }
 
-@media (min-width: 960px) {
-  .home-page > .hero-carousel {
-    width: calc(100% + (var(--space-lg) * 2));
-    margin-left: calc(var(--space-lg) * -1);
-    margin-right: calc(var(--space-lg) * -1);
+.catalog-panel__toggle {
+  display: none;
+}
+
+@media (max-width: 699px) {
+  .catalog-panel {
+    margin-bottom: var(--space-lg);
   }
-}
 
-.home-page__title {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  color: var(--color-ivory);
-}
+  .catalog-panel__heading {
+    margin-bottom: 0;
+  }
 
-.home-page__link {
-  text-decoration: underline;
+  .catalog-panel__toggle {
+    display: inline-block;
+  }
+
+  .catalog-panel__filters {
+    display: none;
+  }
+
+  .catalog-panel--open .catalog-panel__filters {
+    display: grid;
+    margin-top: var(--space-md);
+  }
+
+  .catalog-panel--open .catalog-panel__toggle {
+    border-color: var(--color-gold);
+    color: var(--color-gold);
+  }
 }

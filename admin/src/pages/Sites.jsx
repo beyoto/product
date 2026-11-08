@@ -21,18 +21,19 @@ const slugify = (text) => [...text.toLowerCase()]
 const emptyInfo = () => ({
   tagline: '',
   description: '',
-  heroTitle: '',
-  heroText: '',
-  badges: ['', '', ''],
   phone: '',
   whatsapp: '',
   instagram: '',
   hours: '',
   currency: 'сом',
+  badges: ['', '', ''],
   addresses: [],
+  seoTitle: '',
+  seoDescription: '',
+  shareImage: '',
 });
 
-// Пустые преимущества сохраняем пустой строкой: на сайте подставится текст типа магазина.
+// Пустое преимущество сохраняем пустой строкой: на сайте подставится стандартный текст типа магазина.
 const infoFromSite = (info) => ({
   ...emptyInfo(),
   ...info,
@@ -56,6 +57,43 @@ function ThemePreview({ theme, name }) {
         <span className="theme-preview__button" style={{ background: c.accent, color: c.onAccent }}>Купить</span>
       </div>
       <div className="theme-preview__footer" style={{ background: c.footerBg, color: c.footerText }}>Контакты</div>
+    </div>
+  );
+}
+
+const clip = (text, max) => {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim();
+  return clean.length > max ? `${clean.slice(0, max - 1)}…` : clean;
+};
+
+// Как главная магазина выглядит в Google и в мессенджерах.
+// Подстановки при пустых полях — те же, что в shops/seo/render.js (homeMeta).
+function SeoPreview({ name, info, typeLabel, url }) {
+  const title = info.seoTitle || (info.tagline ? `${name} — ${info.tagline}` : name) || 'Название магазина';
+  const description = info.seoDescription || info.description || `${typeLabel}: каталог ${name} с ценами и фото.`;
+  const domain = url.replace(/^https?:\/\//, '').split('/')[0];
+
+  return (
+    <div className="seo-previews">
+      <div className="seo-preview">
+        <span className="seo-preview__label">Google</span>
+        <span className="seo-preview__url">{url}</span>
+        <strong className="seo-preview__title">{clip(title, 60)}</strong>
+        <p>{clip(description, 160)}</p>
+      </div>
+      <div className="seo-preview seo-preview--share">
+        <span className="seo-preview__label">WhatsApp / Telegram</span>
+        <div className="seo-preview__card">
+          {info.shareImage
+            ? <img src={info.shareImage} alt="" />
+            : <div className="seo-preview__no-image">Фото последнего добавленного товара</div>}
+          <div>
+            <strong>{clip(title, 80)}</strong>
+            <p>{clip(description, 110)}</p>
+            <span>{domain}</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -194,14 +232,9 @@ function SiteForm({ meta, site, onSaved, onCancel }) {
           <Field label="О магазине" hint="Показывается на странице контактов">
             <textarea value={info.description} onChange={setInfoField('description')} maxLength={600} rows={3} />
           </Field>
-          <Field label="Заголовок на главной" hint="Пусто — стандартный текст для этого типа">
-            <textarea value={info.heroTitle} onChange={setInfoField('heroTitle')} maxLength={80} rows={2} placeholder={typeDef?.hero[0].title} />
-          </Field>
-          <Field label="Текст под заголовком">
-            <input value={info.heroText} onChange={setInfoField('heroText')} maxLength={200} placeholder={typeDef?.hero[0].text} />
-          </Field>
         </div>
-        <h3>Преимущества под баннером</h3>
+        <h3>Преимущества под шапкой</h3>
+        <p className="muted">Три коротких фразы с иконками. Пусто — стандартный текст для этого типа магазина.</p>
         <div className="field-grid">
           {info.badges.map((badge, index) => (
             <input
@@ -260,9 +293,31 @@ function SiteForm({ meta, site, onSaved, onCancel }) {
         </div>
       </section>
 
+      <section className="panel">
+        <h2>5. SEO и превью ссылки</h2>
+        <p className="muted">Необязательно. Пусто — возьмём название, подзаголовок, описание и фото товара.</p>
+        <div className="field-grid">
+          <Field label={`SEO-заголовок (${info.seoTitle.length}/60)`} hint="Заголовок в Google и в превью ссылки">
+            <input value={info.seoTitle} onChange={setInfoField('seoTitle')} maxLength={70} />
+          </Field>
+          <Field label="Картинка для соцсетей" hint="Ссылка https://… на картинку 1200×630. Пусто — фото товара">
+            <input value={info.shareImage} onChange={setInfoField('shareImage')} maxLength={600} type="url" />
+          </Field>
+          <Field label={`SEO-описание (${info.seoDescription.length}/160)`} hint="Текст под заголовком в Google">
+            <textarea value={info.seoDescription} onChange={setInfoField('seoDescription')} maxLength={200} rows={3} />
+          </Field>
+        </div>
+        <SeoPreview
+          name={name}
+          info={info}
+          typeLabel={typeDef?.label || ''}
+          url={`${meta.shopUrl}/${slug || '...'}/`}
+        />
+      </section>
+
       {!isEdit && (
         <section className="panel">
-          <h2>5. Админ магазина</h2>
+          <h2>6. Админ магазина</h2>
           <label className="stores__item">
             <input type="checkbox" checked={withAdmin} onChange={(e) => setWithAdmin(e.target.checked)} />
             Сразу создать вход для владельца магазина

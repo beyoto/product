@@ -116,6 +116,16 @@ startViewsSnapshotJobNovaFlowers();
 // Магазины из конструктора (суперадминка → «Магазины»): один роутер на все
 const sitesRouter = require('./routes/sites');
 const startViewsSnapshotJobSites = require('./jobs/viewsSnapshotJob_sites');
+// Список работающих магазинов — для общего sitemap.xml на kg-shop
+app.get('/api/sites', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT slug, updated_at FROM sites WHERE is_active = true ORDER BY slug');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 app.use('/api/sites/:slug', sitesRouter);
 startViewsSnapshotJobSites();
 

@@ -29,7 +29,6 @@ function publicType(type) {
     label: def.label,
     categories: def.categories,
     fields: def.fields,
-    hero: def.hero,
     badges: def.badges,
     catalogTitle: def.catalogTitle,
   };
@@ -153,11 +152,74 @@ router.get('/products/:id', requireActiveSite, async (req, res) => {
     const result = await pool.query(
       `UPDATE site_products p SET views_count = views_count + 1
        WHERE p.id = $1 AND p.site_id = $2 AND p.is_active = true
-       RETURNING p.id, p.name, p.description, p.price, p.category, p.attributes, ${IMAGES_URLS}`,
+       RETURNING p.id, p.name, p.description, p.price, p.category, p.attributes, p.seo, ${IMAGES_URLS}`,
       [req.params.id, req.site.id]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Товар не найден' });
     res.json(result.rows[0]);
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+// ===== Для превью ссылок и поисковиков (shops/middleware.js) =====
+// Отдельно от /products/:id: роботы соцсетей не должны накручивать просмотры.
+
+// GET /api/sites/:slug/share?product=<id> — заголовок, описание и картинка страницы
+router.get('/share', requireActiveSite, async (req, res) => {
+  try {
+    const { slug, name, info } = req.site;
+    const site = {
+      slug,
+      name,
+      typeLabel: req.siteType.label,
+      tagline: info.tagline || '',
+      description: info.description || '',
+      seoTitle: info.seoTitle || '',
+      seoDescription: info.seoDescription || '',
+      shareImage: info.shareImage || '',
+      currency: info.currency || 'сом',
+    };
+
+    let product = null;
+    const productId = req.query.product;
+    if (productId !== undefined) {
+      if (typeof productId !== 'string' || !ID_RE.test(productId)) return res.status(404).json({ error: 'Товар не найден' });
+      const result = await pool.query(
+        `SELECT p.id, p.name, p.description, p.price, p.category, p.seo,
+           (SELECT i.image_url FROM site_product_images i WHERE i.product_id = p.id ORDER BY i.position, i.id LIMIT 1) AS image
+         FROM site_products p WHERE p.id = $1 AND p.site_id = $2 AND p.is_active = true`,
+        [productId, req.site.id]
+      );
+      product = result.rows[0] || null;
+      if (!product) return res.status(404).json({ error: 'Товар не найден' });
+      product.categoryLabel = req.siteType.categories.find((c) => c.value === product.category)?.label || '';
+    }
+
+    // Картинка магазина по умолчанию — фото самого свежего товара
+    if (!site.shareImage) {
+      const cover = await pool.query(
+        `SELECT i.image_url FROM site_product_images i JOIN site_products p ON p.id = i.product_id
+         WHERE p.site_id = $1 AND p.is_active = true ORDER BY p.created_at DESC, i.position, i.id LIMIT 1`,
+        [req.site.id]
+      );
+      site.coverImage = cover.rows[0]?.image_url || '';
+    }
+
+    res.json({ site, product });
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+// GET /api/sites/:slug/sitemap — активные товары для sitemap.xml
+router.get('/sitemap', requireActiveSite, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, updated_at FROM site_products WHERE site_id = $1 AND is_active = true ORDER BY id LIMIT 5000`,
+      [req.site.id]
+    );
+    res.json({ updated_at: req.site.updated_at, products: result.rows });
   } catch (err) {
     handleError(res, err);
   }
@@ -204,11 +266,11 @@ router.post('/products', checkAuth, async (req, res) => {
   try {
     const values = validateProduct(req.siteType, req.body);
     const result = await pool.query(
-      `INSERT INTO site_products (site_id, name, description, price, category, attributes, is_active)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      `INSERT INTO site_products (site_id, name, description, price, category, attributes, seo, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
       [
         req.site.id, values.name, values.description, values.price, values.category,
-        JSON.stringify(values.attributes), values.is_active ?? true,
+        JSON.stringify(values.attributes), JSON.stringify(values.seo), values.is_active ?? true,
       ]
     );
     res.status(201).json(result.rows[0]);
@@ -217,7 +279,8 @@ router.post('/products', checkAuth, async (req, res) => {
   }
 });
 
-const UPDATABLE = ['name', 'description', 'price', 'category', 'attributes', 'is_active'];
+const UPDATABLE = ['name', 'description', 'price', 'category', 'attributes', 'seo', 'is_active'];
+const JSON_FIELDS = new Set(['attributes', 'seo']);
 
 // PUT /api/sites/:slug/products/:id — можно прислать только изменённые поля
 router.put('/products/:id', checkAuth, async (req, res) => {
@@ -229,7 +292,7 @@ router.put('/products/:id', checkAuth, async (req, res) => {
     const params = [];
     for (const key of UPDATABLE) {
       if (values[key] === undefined) continue;
-      params.push(key === 'attributes' ? JSON.stringify(values[key]) : values[key]);
+      params.push(JSON_FIELDS.has(key) ? JSON.stringify(values[key]) : values[key]);
       sets.push(`${key} = $${params.length}`);
     }
     if (sets.length === 0) throw new ValidationError('Нечего сохранять');

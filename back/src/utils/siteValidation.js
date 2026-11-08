@@ -3,6 +3,9 @@ const { RESERVED_SLUGS } = require('../config/stores.js');
 
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])$/;
 const MAX_ADDRESSES = 5;
+// Поисковики показывают примерно 60 и 160 символов; запас — на случай длинных названий.
+const SEO_TITLE_MAX = 70;
+const SEO_DESCRIPTION_MAX = 200;
 
 class ValidationError extends Error {}
 
@@ -63,8 +66,6 @@ function validateInfo(input) {
   return {
     tagline: cleanText(input.tagline, 'Подзаголовок', 120),
     description: cleanText(input.description, 'Описание', 600),
-    heroTitle: cleanText(input.heroTitle, 'Заголовок на главной', 80),
-    heroText: cleanText(input.heroText, 'Текст на главной', 200),
     badges: badges.map((badge) => cleanText(badge, 'Преимущество', 60)),
     phone,
     phoneDigits: phone.replace(/\D/g, ''),
@@ -72,6 +73,9 @@ function validateInfo(input) {
     instagram: cleanUrl(input.instagram, 'Instagram'),
     hours: cleanText(input.hours, 'Режим работы', 120),
     currency: cleanText(input.currency, 'Валюта', 10) || 'сом',
+    seoTitle: cleanText(input.seoTitle, 'SEO-заголовок', SEO_TITLE_MAX),
+    seoDescription: cleanText(input.seoDescription, 'SEO-описание', SEO_DESCRIPTION_MAX),
+    shareImage: cleanUrl(input.shareImage, 'Картинка для соцсетей'),
     addresses: addresses
       .map((item) => ({
         city: cleanText(item?.city, 'Город', 60),
@@ -156,6 +160,17 @@ function validateProduct(typeDef, body, { partial = false } = {}) {
   }
 
   if (!partial || has('attributes')) values.attributes = validateAttributes(typeDef, body.attributes ?? {});
+
+  if (!partial || has('seo')) {
+    const seo = body.seo ?? {};
+    if (seo === null || typeof seo !== 'object' || Array.isArray(seo)) fail('Неверные SEO-данные');
+    const title = cleanText(seo.title, 'SEO-заголовок', SEO_TITLE_MAX);
+    const description = cleanText(seo.description, 'SEO-описание', SEO_DESCRIPTION_MAX);
+    values.seo = {
+      ...(title ? { title } : {}),
+      ...(description ? { description } : {}),
+    };
+  }
 
   if (has('is_active')) {
     if (typeof body.is_active !== 'boolean') fail('is_active must be boolean');

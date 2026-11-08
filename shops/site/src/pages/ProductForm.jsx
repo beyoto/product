@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import api, { errorText } from '../site.js';
+import api, { BASENAME, errorText } from '../site.js';
 import { useSite } from '../SiteContext.jsx';
+import { formatPrice, categoryLabel } from '../catalog.js';
+import SeoFields from '../components/SeoFields.jsx';
 import './ProductForm.css';
 
 const MAX_IMAGES = 10;
@@ -13,6 +15,7 @@ const emptyForm = (type) => ({
   price: '',
   category: type.categories[0].value,
   attributes: {},
+  seo: { title: '', description: '' },
 });
 
 // Значения особых полей в форме хранятся строками (input), на отправке приводятся к типам.
@@ -90,7 +93,7 @@ function ProductForm() {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
-  const { info, type } = useSite();
+  const { name: siteName, info, type } = useSite();
 
   const [form, setForm] = useState(() => emptyForm(type));
   const [existingImages, setExistingImages] = useState([]);
@@ -113,6 +116,7 @@ function ProductForm() {
           price: String(Number(product.price)),
           category: product.category,
           attributes: toFormAttributes(type, product.attributes),
+          seo: { title: product.seo?.title || '', description: product.seo?.description || '' },
         });
         setExistingImages(product.images);
       })
@@ -180,6 +184,7 @@ function ProductForm() {
       price: form.price === '' ? '' : Number(form.price),
       category: form.category,
       attributes: toPayloadAttributes(type, form.attributes),
+      seo: form.seo,
     };
 
     let productId = id;
@@ -323,6 +328,27 @@ function ProductForm() {
               ))}
             </div>
           )}
+        </section>
+
+        <section className="add-product__section">
+          <div className="add-product__section-header">
+            <div>
+              <h2>SEO и превью ссылки</h2>
+              <p>Необязательно. Пусто — возьмём название, описание и первое фото</p>
+            </div>
+          </div>
+          <SeoFields
+            title={form.seo.title}
+            description={form.seo.description}
+            onChange={(seo) => setForm((prev) => ({ ...prev, seo }))}
+            fallback={{
+              title: `${form.name || 'Название товара'} — ${siteName}`,
+              description: form.description
+                || [categoryLabel(type, form.category), formatPrice(form.price, info.currency), siteName].join(' · '),
+            }}
+            url={`${window.location.origin}${BASENAME}/product/${id || '…'}`}
+            image={existingImages[0]?.url || files[0]?.preview}
+          />
         </section>
 
         {error && <div className="add-product__error" role="alert">{error}</div>}

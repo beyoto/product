@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { LEGACY_STORES } from '../legacyStores.js';
 
 const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const CORE_DIR = path.join(ROOT, 'core');
@@ -50,12 +51,14 @@ export function checkVercelRewrites() {
   const source = vercel.rewrites[0]?.source || '';
   const listed = (source.match(/^\/:store\(([^)]*)\)/)?.[1] || '').split('|').filter(Boolean).sort();
   const stores = listStores();
+  const legacy = [...LEGACY_STORES].sort();
 
-  if (listed.join() !== stores.join()) {
+  if (listed.join() !== stores.join() || legacy.join() !== stores.join()) {
     throw new Error([
-      'vercel.json: в первом rewrite должны быть все папки stores/.',
-      `Сейчас: ${listed.join(', ')}`,
-      `Нужно:  ${stores.join(', ')}`,
+      'Список старых магазинов должен совпадать с папками stores/ в двух местах:',
+      `vercel.json (первый rewrite): ${listed.join(', ')}`,
+      `legacyStores.js:              ${legacy.join(', ')}`,
+      `папки stores/:                ${stores.join(', ')}`,
     ].join('\n'));
   }
 }

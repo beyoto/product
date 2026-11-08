@@ -61,7 +61,7 @@ function ProductPage() {
   }, [id]);
 
   useEffect(() => {
-    if (product) document.title = `${product.name} — ${siteName}`;
+    if (product) document.title = product.seo?.title || `${product.name} — ${siteName}`;
   }, [product, siteName]);
 
   if (loading) return <p className="page-status">Загрузка...</p>;
