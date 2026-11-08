@@ -1,13 +1,17 @@
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db.js');
-const { isStore } = require('../config/stores.js');
+const { isStore, siteKey } = require('../config/stores.js');
 const { recordSecurityEvent } = require('../utils/securityLog.js');
 
 const STORE_ROUTE = /^\/api\/(?:products|analytics)(?:_([A-Za-z0-9_]+))?$/;
+const SITE_ROUTE = /^\/api\/sites\/([a-z0-9-]+)$/;
 
 // Магазин определяется по пути, на котором смонтирован роутер.
 // null означает, что путь не относится к магазину: туда пускаем только суперадмина.
 function storeFromRequest(req) {
+  const site = req.baseUrl.match(SITE_ROUTE);
+  if (site) return siteKey(site[1]);
+
   const match = req.baseUrl.match(STORE_ROUTE);
   if (!match) return null;
 

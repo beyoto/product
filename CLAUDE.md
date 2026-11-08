@@ -8,15 +8,39 @@
 | Папка | Что это | Где задеплоено |
 |---|---|---|
 | `back/` | Express + PostgreSQL + Cloudinary. Все магазины ходят сюда | Railway: `https://product-production-1794.up.railway.app` |
-| `shops/` | **Все магазины в одном сайте.** Общий код + отличия магазинов | Vercel, проект `kg-shop` (Root Directory `shops`): `https://kg-shop.vercel.app/<магазин>/` |
-| `admin/` | Суперадминка: админы магазинов, журнал безопасности | Vercel, проект `panel` (Root Directory `admin`) |
+| `shops/` | **Все магазины в одном сайте.** Старые: общий код + отличия. Новые: шаблон конструктора `shops/site/` | Vercel, проект `kg-shop` (Root Directory `shops`): `https://kg-shop.vercel.app/<магазин>/` |
+| `admin/` | Суперадминка: конструктор магазинов, админы, журнал безопасности | Vercel, проект `panel` (Root Directory `admin`) |
 | `front/` | Старый исходник Aveline. Перенесён в `shops/stores/aveline`, не правь | старый отдельный проект |
 | `result/` | Одиночная статичная страница, к магазинам не относится | — |
 
 Папки рядом с репозиторием (`../baha`, `../nova_flowers`, `../asiamixx/front` и т.д.) — **старые** исходники отдельных
 магазинов. Весь их код уже в `shops/`. Новые правки делать только в `shops/`.
 
-## shops/ — как устроено
+## Два вида магазинов
+
+1. **Магазины из конструктора (новые, основной путь).** Создаются в панели → «Магазины» без кода и без деплоя.
+   Данные: таблицы `sites`, `site_products` (+ `site_product_images`, `site_views_snapshots`), создаются сами при старте бэка
+   (`back/src/db/ensureSites.js`). Фронт — один шаблон `shops/site/`, собирается в `dist/_app/`; Vercel отправляет на него
+   все пути, кроме старых магазинов. Шаблон берёт адрес магазина из URL и грузит настройки с `GET /api/sites/<slug>`.
+2. **Старые магазины** (папки `shops/stores/*`, свои таблицы `products_<key>`). Живут в коде, меняются через разработку.
+
+### Конструктор: где что
+- `back/src/config/siteTypes.js` — **типы магазинов** (цветы, одежда, обувь, ювелирка, двери, авто, мебель, косметика,
+  электроника, универсальный): категории, особые поля товара, тексты баннера и преимуществ; и **цветовые темы**.
+  Это единый источник: бэк проверяет по нему товары, панель рисует форму создания, сайт — форму товара, фильтры и характеристики.
+  - Поле: `text | number | select | multiselect`; `required`, `unit`, `integer`, `min/max`, `card` (на карточке), `filter` (фильтр каталога; только select/multiselect).
+  - **`value` у категорий и опций хранится в базе — не переименовывать**; `label` менять можно. Новые поля/опции добавлять можно.
+- Товар: общие колонки `name, description, price, category` + особые поля в `attributes JSONB`
+  (`back/src/utils/siteValidation.js`: неизвестные ключи отбрасываются, select/multiselect только из справочника). Цена 0 = «Цена по запросу».
+- `back/src/routes/sites.js` — `/api/sites/:slug/...` (каталог, товары, фото, аналитика). Товары всегда фильтруются по `site_id`.
+- `back/src/routes/superSites.js` — `/api/super/sites` (meta, создать с админом в одной транзакции, изменить, отключить, удалить с подтверждением).
+- Права: ключ магазина `site:<slug>` в `admins.stores`; `checkAuth` берёт его из пути `/api/sites/<slug>`.
+- Адрес (`slug`) и тип после создания не меняются. Занятые адреса — `RESERVED_SLUGS` в `back/src/config/stores.js`.
+- Фото — Cloudinary, папка `sites/<slug>`, до 10 на товар. При удалении магазина фото в Cloudinary остаются.
+- Тема: `shops/site/src/theme.js` пишет цвета в CSS-переменные (`--color-gold` = акцент, `--color-ivory` = текст, `--header-*`, `--footer-*`).
+  CSS шаблона — копия вёрстки nova, все цвета через переменные/`color-mix`. Новую тему добавлять только в `THEMES`.
+
+## shops/ — старые магазины, как устроено
 
 - `shops/core/` — общий Vite + React 19 + MUI сайт (роутинг, корзина/избранное, админка товаров, аналитика).
 - `shops/stores/<slug>/` — только файлы, которыми магазин отличается. Файл заменяет одноимённый из `core/`
@@ -26,7 +50,8 @@
   `VITE_STORE` (= slug), `VITE_STORE_KEY` (= key), `VITE_API_URL` (по умолчанию Railway).
 - `shops/scripts/build.mjs` собирает каждый магазин с `base: /<slug>/` в `shops/dist/<slug>` и пишет `dist/index.html`
   (служебный список ссылок — это и есть «голая» главная `kg-shop.vercel.app`).
-- `shops/vercel.json` переписывает `/<slug>/*` на `/<slug>/index.html` (SPA).
+- `shops/vercel.json`: первый rewrite — явный список старых магазинов → `/<slug>/index.html`, второй — всё остальное → `/_app/index.html` (конструктор).
+  **Новая папка в `stores/` = добавить её в этот список**, иначе сборка упадёт (`checkVercelRewrites` в `scripts/stores.mjs`) — и в `RESERVED_SLUGS` на бэке.
 
 Правила, из-за того что все магазины на одном домене:
 - `BrowserRouter basename={import.meta.env.BASE_URL}`.
@@ -56,7 +81,9 @@
   и свои таблицы в БД (`back/src/db/schema.sql`).
 - `back/src/config/stores.js` — единый список магазинов (подпись, адрес на kg-shop, старые домены для журнала).
 - Авторизация: `routes/auth.js` (JWT), `middleware/checkAuth.js`; роли super/store-admin, `routes/super.js`.
-- Журнал безопасности: `utils/securityLog.js`. Магазин определяется по старому Origin или по `store` из тела логина/логаута.
+- Журнал безопасности: `utils/securityLog.js`, таблица `security_events`, чистка старше 180 дней. Пишет события входа/выхода,
+  проблемы с токеном, отказ в доступе, все изменения (не GET) в любом магазине, действия суперадмина (админы, магазины).
+  Магазин определяется по пути запроса, старому Origin или по `store` из тела логина/логаута. Лимит входа: `utils/loginGuard.js`.
 
 ## Команды
 
@@ -65,6 +92,7 @@ cd shops
 npm run dev -- baha       # один магазин локально
 npm run build             # все магазины -> shops/dist
 npm run build -- baha     # один
+npm run dev -- site       # шаблон конструктора: http://localhost:5173/<адрес-магазина>/
 
 cd back
 npm run dev

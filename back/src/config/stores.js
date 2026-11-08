@@ -21,7 +21,20 @@ const STORES = {
   nova_flowers: { label: 'Nova Flowers', url: `${SHOP}/nova` },
 };
 
-const isStore = (key) => Object.hasOwn(STORES, key);
+// Магазины из конструктора (таблица sites) получают ключ site:<slug>.
+const SITE_KEY_PREFIX = 'site:';
+const siteKey = (slug) => `${SITE_KEY_PREFIX}${slug}`;
+const SITE_KEY_RE = /^site:[a-z0-9][a-z0-9-]{0,38}[a-z0-9]$/;
+const isSiteKey = (key) => typeof key === 'string' && SITE_KEY_RE.test(key);
+
+// Пути kg-shop, занятые старыми магазинами (папки shops/stores) и служебными файлами.
+const RESERVED_SLUGS = new Set([
+  'asiamixx', 'aveline', 'baha', 'crowncarat', 'ernis', 'etno', 'hayk', 'myrza', 'nova',
+  'admin', 'api', 'app', 'assets', 'index', 'static', 'public', 'favicon',
+]);
+
+// Существование site-магазина здесь не проверяется: ключ только определяет, к чему относится запрос.
+const isStore = (key) => Object.hasOwn(STORES, key) || isSiteKey(key);
 
 // Для журнала: с какого сайта пришёл запрос. Заголовок Origin можно подделать,
 // поэтому для проверки доступа он не используется.
@@ -34,4 +47,12 @@ const ORIGINS = new Map(
 
 const storeFromOrigin = (origin) => ORIGINS.get(origin) || null;
 
-module.exports = { STORES, isStore, storeFromOrigin };
+module.exports = {
+  SHOP,
+  STORES,
+  RESERVED_SLUGS,
+  isStore,
+  isSiteKey,
+  siteKey,
+  storeFromOrigin,
+};

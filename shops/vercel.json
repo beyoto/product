@@ -2,7 +2,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/:store", "destination": "/:store/index.html" },
-    { "source": "/:store/:path*", "destination": "/:store/index.html" }
+    { "source": "/:store(asiamixx|aveline|baha|crowncarat|ernis|etno|hayk|myrza|nova)/:path*", "destination": "/:store/index.html" },
+    { "source": "/:slug/:path*", "destination": "/_app/index.html" }
   ]
 }

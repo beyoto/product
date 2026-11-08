@@ -113,6 +113,12 @@ const startViewsSnapshotJobNovaFlowers = require('./jobs/viewsSnapshotJob_nova_f
 app.use('/api/analytics_nova_flowers', analyticsNovaFlowersRouter);
 startViewsSnapshotJobNovaFlowers();
 
+// Магазины из конструктора (суперадминка → «Магазины»): один роутер на все
+const sitesRouter = require('./routes/sites');
+const startViewsSnapshotJobSites = require('./jobs/viewsSnapshotJob_sites');
+app.use('/api/sites/:slug', sitesRouter);
+startViewsSnapshotJobSites();
+
 //////////////////////////////////////////////////////////////////////////
 
 
@@ -135,14 +141,17 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// Журнал безопасности: таблица создаётся до приёма запросов
+// Журнал безопасности и таблицы конструктора создаются до приёма запросов
 const ensureSecurityEvents = require('./db/ensureSecurityEvents');
+const ensureSites = require('./db/ensureSites');
 const startSecurityEventsCleanup = require('./jobs/securityEventsCleanup');
 startSecurityEventsCleanup();
 
 // Запуск сервера на указанном порту
-ensureSecurityEvents()
-  .catch((err) => console.error('Security events table setup failed:', err.message))
+Promise.all([
+  ensureSecurityEvents().catch((err) => console.error('Security events table setup failed:', err.message)),
+  ensureSites().catch((err) => console.error('Sites tables setup failed:', err.message)),
+])
   .finally(() => {
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);

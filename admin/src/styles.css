@@ -301,3 +301,166 @@ button:disabled {
   width: 100%;
   margin-top: 12px;
 }
+
+h3 {
+  margin: 16px 0 8px;
+  font-size: 0.95rem;
+}
+
+a {
+  color: var(--accent);
+  overflow-wrap: anywhere;
+}
+
+textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  resize: vertical;
+}
+
+input:disabled {
+  opacity: 0.6;
+}
+
+/* ===== Конструктор магазинов ===== */
+.site-form .panel {
+  margin-top: 0;
+}
+
+.panel--success {
+  border-color: var(--accent);
+}
+
+.panel--success p {
+  margin: 0 0 10px;
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.choice-grid--themes {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.choice--active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.choice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.choice:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.type-fields {
+  margin-top: 12px;
+  font-size: 0.88rem;
+}
+
+.theme-preview {
+  overflow: hidden;
+  border: 1px solid;
+  border-radius: 6px;
+  font-size: 0.72rem;
+}
+
+.theme-preview__header,
+.theme-preview__footer {
+  padding: 6px 8px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.theme-preview__body {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 8px;
+}
+
+.theme-preview__card {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 8px;
+  border: 1px solid;
+  border-radius: 4px;
+}
+
+.theme-preview__button {
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field__label {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.field__hint {
+  color: var(--muted);
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.address-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 2fr auto;
+  gap: 8px;
+}
+
+@media (max-width: 700px) {
+  .address-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.site-card p {
+  margin: 6px 0 0;
+}
+
+.site-form {
+  margin-top: 16px;
+}

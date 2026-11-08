@@ -1,0 +1,127 @@
+.site-header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin: calc(-1 * var(--space-lg)) calc(-1 * var(--space-md)) var(--space-lg);
+  padding: var(--space-md);
+  background-color: var(--header-bg);
+  color: var(--header-text);
+  border-bottom: 1px solid color-mix(in srgb, var(--header-text) 10%, transparent);
+}
+
+.site-header__icon-btn {
+  color: var(--header-text);
+  padding: var(--space-xs);
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.site-header__icon-btn:focus {
+  outline: none;
+}
+
+.site-header__icon-btn:active {
+  background: transparent;
+}
+
+.site-header__heart {
+  position: relative;
+}
+
+.site-header__badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background-color: var(--color-gold);
+  color: var(--color-on-accent);
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 999px;
+}
+
+.site-header__brand {
+  flex: 1;
+  text-align: center;
+}
+
+.site-header__brand h1 {
+  font-size: 2rem;
+  color: var(--header-text);
+  letter-spacing: 0.02em;
+  margin-bottom: 2%;
+}
+
+.site-header__brand p {
+  color: color-mix(in srgb, var(--header-text) 65%, transparent);
+  font-size: 0.8rem;
+}
+
+/* ===== Slide-in menu ===== */
+.site-header__overlay {
+  position: fixed;
+  inset: 0;
+  background-color: color-mix(in srgb, var(--color-ivory) 35%, transparent);
+  backdrop-filter: blur(2px);
+  z-index: 100;
+}
+
+.site-header__menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 78%;
+  max-width: 320px;
+  background-color: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  padding: var(--space-lg) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  animation: slide-in 0.25s ease;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.site-header__close-btn {
+  align-self: flex-end;
+  color: var(--color-muted);
+  font-size: 1.2rem;
+  margin-bottom: var(--space-md);
+}
+
+.site-header__menu a {
+  color: var(--color-ivory);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--color-border);
+  transition: color var(--transition);
+}
+
+.site-header__menu a:hover {
+  color: var(--color-gold);
+}
+
+@media (min-width: 960px) {
+  .site-header {
+    margin: calc(-1 * var(--space-xl)) calc(-1 * var(--space-lg)) var(--space-lg);
+    padding: var(--space-md) var(--space-lg);
+  }
+
+  .site-header__brand h1 {
+    font-size: 2.75rem;
+  }
+}

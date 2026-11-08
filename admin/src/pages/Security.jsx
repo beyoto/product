@@ -21,6 +21,9 @@ const EVENT_LABELS = {
   admin_created: 'Админ создан',
   admin_updated: 'Админ изменён',
   admin_deleted: 'Админ удалён',
+  site_created: 'Магазин создан',
+  site_updated: 'Магазин изменён',
+  site_deleted: 'Магазин удалён',
 };
 
 const SEVERITY_LABELS = { info: 'Инфо', warning: 'Внимание', critical: 'Критично' };

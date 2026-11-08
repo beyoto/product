@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const pool = require('../config/db.js');
-const { STORES, isStore } = require('../config/stores.js');
+const { SHOP, STORES, isStore, isSiteKey, siteKey } = require('../config/stores.js');
 const { requireSuperAdmin } = require('../middleware/checkAuth');
 const { recordSecurityEvent } = require('../utils/securityLog.js');
+const { validatePassword, validateUsername } = require('../utils/passwords.js');
+const superSitesRouter = require('./superSites.js');
 
 const EVENT_FILTERS = {
   severity: (value) => ['info', 'warning', 'critical'].includes(value),
@@ -21,16 +23,17 @@ const ALERT_TYPES = [
 const ADMIN_FIELDS = 'id, username, role, stores, is_active, created_at';
 
 router.use(requireSuperAdmin);
+router.use('/sites', superSitesRouter);
 
-function validateStores(stores) {
-  return Array.isArray(stores) && stores.every((key) => typeof key === 'string' && isStore(key));
-}
+// Старые магазины — из config/stores.js, магазины из конструктора — должны существовать в sites.
+async function validateStores(stores) {
+  if (!Array.isArray(stores) || !stores.every((key) => typeof key === 'string' && isStore(key))) return false;
 
-// bcrypt учитывает только первые 72 байта пароля
-function validatePassword(password) {
-  return typeof password === 'string'
-    && password.length >= 8
-    && Buffer.byteLength(password) <= 72;
+  const slugs = stores.filter(isSiteKey).map((key) => key.slice('site:'.length));
+  if (slugs.length === 0) return true;
+
+  const result = await pool.query('SELECT COUNT(*)::int AS count FROM sites WHERE slug = ANY($1)', [slugs]);
+  return result.rows[0].count === new Set(slugs).size;
 }
 
 // Суперадмин не редактируется через панель, поэтому себя случайно не заблокировать.
@@ -45,9 +48,18 @@ async function findStoreAdmin(id) {
   return { admin };
 }
 
-// GET /api/super/stores
-router.get('/stores', (req, res) => {
-  res.json(Object.entries(STORES).map(([key, store]) => ({ key, ...store })));
+// GET /api/super/stores — старые магазины и магазины из конструктора
+router.get('/stores', async (req, res) => {
+  try {
+    const sites = await pool.query('SELECT slug, name FROM sites ORDER BY created_at');
+    res.json([
+      ...Object.entries(STORES).map(([key, store]) => ({ key, label: store.label, url: store.url })),
+      ...sites.rows.map((site) => ({ key: siteKey(site.slug), label: site.name, url: `${SHOP}/${site.slug}/` })),
+    ]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // GET /api/super/admins
@@ -67,13 +79,13 @@ router.post('/admins', async (req, res) => {
     const { password, stores } = req.body;
     const username = typeof req.body.username === 'string' ? req.body.username.trim() : '';
 
-    if (username.length < 3 || username.length > 50) {
+    if (!validateUsername(username)) {
       return res.status(400).json({ error: 'Логин должен быть от 3 до 50 символов' });
     }
     if (!validatePassword(password)) {
       return res.status(400).json({ error: 'Пароль должен быть от 8 до 72 символов' });
     }
-    if (!validateStores(stores) || stores.length === 0) {
+    if (!(await validateStores(stores)) || stores.length === 0) {
       return res.status(400).json({ error: 'Выбери хотя бы один магазин' });
     }
 
@@ -107,7 +119,7 @@ router.patch('/admins/:id', async (req, res) => {
     const { admin, status, error } = await findStoreAdmin(req.params.id);
     if (!admin) return res.status(status).json({ error });
 
-    if (stores !== undefined && !validateStores(stores)) {
+    if (stores !== undefined && !(await validateStores(stores))) {
       return res.status(400).json({ error: 'Неизвестный магазин' });
     }
     if (isActive !== undefined && typeof isActive !== 'boolean') {

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import api, { clearToken, errorText, getToken, saveToken } from './api.js';
 import Admins from './pages/Admins.jsx';
 import Security from './pages/Security.jsx';
+import Sites from './pages/Sites.jsx';
 
 function LoginForm({ onSuccess }) {
   const [username, setUsername] = useState('');
@@ -56,7 +57,7 @@ function App() {
   const [token, setToken] = useState(getToken);
   const [me, setMe] = useState(null);
   const [stores, setStores] = useState([]);
-  const [tab, setTab] = useState('security');
+  const [tab, setTab] = useState('sites');
   const [error, setError] = useState('');
 
   const clearSession = useCallback(() => {
@@ -73,6 +74,12 @@ function App() {
     }
     clearSession();
   };
+
+  // Список магазинов для фильтров и прав админов; после создания магазина обновляется.
+  const reloadStores = useCallback(async () => {
+    const res = await api.get('/super/stores');
+    setStores(res.data);
+  }, []);
 
   const handleLogin = (newToken) => {
     saveToken(newToken);
@@ -144,6 +151,13 @@ function App() {
       <nav className="tabs" aria-label="Разделы">
         <button
           type="button"
+          aria-current={tab === 'sites' ? 'page' : undefined}
+          onClick={() => setTab('sites')}
+        >
+          Магазины
+        </button>
+        <button
+          type="button"
           aria-current={tab === 'security' ? 'page' : undefined}
           onClick={() => setTab('security')}
         >
@@ -158,9 +172,9 @@ function App() {
         </button>
       </nav>
 
-      {tab === 'security'
-        ? <Security stores={stores} />
-        : <Admins stores={stores} />}
+      {tab === 'sites' && <Sites onStoresChanged={reloadStores} />}
+      {tab === 'security' && <Security stores={stores} />}
+      {tab === 'admins' && <Admins stores={stores} />}
     </main>
   );
 }
