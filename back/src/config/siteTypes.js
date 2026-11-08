@@ -11,10 +11,12 @@ const multi = (key, label, options, extra = {}) => ({ key, label, type: 'multise
 
 const CONDITION = [['new', 'Новый'], ['used', 'Б/у']];
 
+// taglines — варианты подзаголовка для быстрого выбора в панели.
 // fields: card — показывать на карточке в каталоге, filter — фильтр в каталоге (только select/multiselect).
 const SITE_TYPES = {
   flowers: {
     label: 'Цветы',
+    taglines: ['Цветы и букеты · Бишкек', 'Свежие цветы с доставкой', 'Букеты на любой повод'],
     categories: opts([
       ['roses', 'Розы'], ['tulips', 'Тюльпаны'], ['peonies', 'Пионы'], ['chrysanthemums', 'Хризантемы'],
       ['bouquets', 'Букеты'], ['compositions', 'Композиции'], ['potted', 'Комнатные растения'], ['gifts', 'Подарки'],
@@ -37,6 +39,7 @@ const SITE_TYPES = {
 
   clothing: {
     label: 'Одежда',
+    taglines: ['Одежда · Бишкек', 'Стильная одежда на каждый день', 'Мужская и женская одежда'],
     categories: opts([
       ['tshirt', 'Футболки'], ['shirt', 'Рубашки'], ['hoodie', 'Худи и свитшоты'], ['outerwear', 'Верхняя одежда'],
       ['dress', 'Платья'], ['pants', 'Брюки'], ['jeans', 'Джинсы'], ['skirt', 'Юбки'], ['shorts', 'Шорты'],
@@ -62,6 +65,7 @@ const SITE_TYPES = {
 
   shoes: {
     label: 'Обувь',
+    taglines: ['Обувь · Бишкек', 'Обувь для всей семьи', 'Кроссовки, ботинки и туфли'],
     categories: opts([
       ['sneakers', 'Кроссовки'], ['boots', 'Ботинки'], ['classic', 'Туфли'], ['sandals', 'Сандалии'],
       ['winter', 'Зимняя обувь'], ['slippers', 'Домашняя обувь'], ['care', 'Уход и аксессуары'],
@@ -86,6 +90,7 @@ const SITE_TYPES = {
 
   jewelry: {
     label: 'Ювелирные изделия',
+    taglines: ['Ювелирные украшения · Бишкек', 'Золото и серебро', 'Украшения для особых моментов'],
     categories: opts([
       ['ring', 'Кольца'], ['earrings', 'Серьги'], ['chain', 'Цепочки'], ['bracelet', 'Браслеты'],
       ['pendant', 'Подвески'], ['necklace', 'Колье'], ['set', 'Комплекты'],
@@ -109,6 +114,7 @@ const SITE_TYPES = {
 
   doors: {
     label: 'Двери',
+    taglines: ['Двери · Бишкек', 'Межкомнатные и входные двери', 'Двери с установкой под ключ'],
     categories: opts([
       ['interior', 'Межкомнатные'], ['entrance', 'Входные'], ['sliding', 'Раздвижные'],
       ['glass', 'Стеклянные'], ['hardware', 'Фурнитура'],
@@ -137,6 +143,7 @@ const SITE_TYPES = {
 
   cars: {
     label: 'Автосалон',
+    taglines: ['Автосалон · Бишкек', 'Авто в наличии и под заказ', 'Новые и с пробегом'],
     categories: opts([
       ['sedan', 'Седан'], ['suv', 'Внедорожник'], ['crossover', 'Кроссовер'], ['hatchback', 'Хэтчбек'],
       ['minivan', 'Минивэн'], ['coupe', 'Купе'], ['pickup', 'Пикап'],
@@ -169,6 +176,7 @@ const SITE_TYPES = {
 
   furniture: {
     label: 'Мебель',
+    taglines: ['Мебель · Бишкек', 'Мебель для дома и офиса', 'Мебель на заказ'],
     categories: opts([
       ['sofa', 'Диваны'], ['bed', 'Кровати'], ['table', 'Столы'], ['chair', 'Стулья и кресла'],
       ['wardrobe', 'Шкафы'], ['kitchen', 'Кухни'], ['kids', 'Детская мебель'], ['office', 'Офисная мебель'],
@@ -190,6 +198,7 @@ const SITE_TYPES = {
 
   cosmetics: {
     label: 'Косметика',
+    taglines: ['Косметика · Бишкек', 'Уход, макияж и парфюмерия', 'Оригинальная косметика'],
     categories: opts([
       ['skincare', 'Уход за лицом'], ['makeup', 'Макияж'], ['hair', 'Уход за волосами'],
       ['body', 'Уход за телом'], ['perfume', 'Парфюмерия'], ['sets', 'Наборы'],
@@ -212,6 +221,7 @@ const SITE_TYPES = {
 
   electronics: {
     label: 'Электроника',
+    taglines: ['Электроника · Бишкек', 'Смартфоны, ноутбуки, аксессуары', 'Техника с гарантией'],
     categories: opts([
       ['phones', 'Смартфоны'], ['laptops', 'Ноутбуки'], ['tablets', 'Планшеты'], ['audio', 'Аудио'],
       ['watches', 'Смарт-часы'], ['accessories', 'Аксессуары'],
@@ -234,6 +244,7 @@ const SITE_TYPES = {
 
   general: {
     label: 'Универсальный',
+    taglines: ['Магазин · Бишкек', 'Всё нужное в одном месте', 'Новинки каждую неделю'],
     categories: opts([['goods', 'Товары'], ['new', 'Новинки'], ['popular', 'Популярное'], ['sale', 'Акции']]),
     fields: [
       text('brand', 'Бренд'),

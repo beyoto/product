@@ -109,12 +109,12 @@ function HomePage() {
 
             <label>
               <span>Цена от</span>
-              <input type="number" name="price_from" value={filters.price_from} onChange={setFilter} min="0" placeholder={`От, ${info.currency}`} />
+              <input type="number" name="price_from" value={filters.price_from} onChange={setFilter} min="0" placeholder="От" />
             </label>
 
             <label>
               <span>Цена до</span>
-              <input type="number" name="price_to" value={filters.price_to} onChange={setFilter} min="0" placeholder={`До, ${info.currency}`} />
+              <input type="number" name="price_to" value={filters.price_to} onChange={setFilter} min="0" placeholder="До" />
             </label>
 
             <label>

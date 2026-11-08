@@ -555,3 +555,39 @@ input:disabled {
   color: #888888;
   font-size: 0.75rem;
 }
+
+/* Быстрый выбор готовых вариантов под полем */
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.presets .field__hint {
+  flex-basis: 100%;
+}
+
+.preset {
+  min-height: 32px;
+  padding: 4px 12px;
+  border-color: var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+
+.preset:hover {
+  border-color: var(--accent);
+}
+
+.preset--active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+}
+
+.field--wide {
+  grid-column: 1 / -1;
+}

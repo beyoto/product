@@ -223,9 +223,30 @@ function SiteForm({ meta, site, onSaved, onCancel }) {
               required
             />
           </Field>
-          <Field label="Подзаголовок в шапке" hint="Например: Цветы и букеты · Бишкек">
-            <input value={info.tagline} onChange={setInfoField('tagline')} maxLength={120} />
-          </Field>
+          <div className="field field--wide">
+            <Field label="Подзаголовок в шапке">
+              <input
+                value={info.tagline}
+                onChange={setInfoField('tagline')}
+                maxLength={120}
+                placeholder={typeDef?.taglines[0]}
+              />
+            </Field>
+            <div className="presets" role="group" aria-label="Готовые варианты подзаголовка">
+              <span className="field__hint">Готовые варианты (нажми — подставится, потом можно поправить):</span>
+              {typeDef?.taglines.map((tagline) => (
+                <button
+                  key={tagline}
+                  type="button"
+                  className={`preset${info.tagline === tagline ? ' preset--active' : ''}`}
+                  aria-pressed={info.tagline === tagline}
+                  onClick={() => setInfo((prev) => ({ ...prev, tagline }))}
+                >
+                  {tagline}
+                </button>
+              ))}
+            </div>
+          </div>
           <Field label="Валюта">
             <input value={info.currency} onChange={setInfoField('currency')} maxLength={10} />
           </Field>
