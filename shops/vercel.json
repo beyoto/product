@@ -3,6 +3,7 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/:store(asiamixx|aveline|baha|crowncarat|ernis|etno|hayk|myrza|nova)/:path*", "destination": "/:store/index.html" },
-    { "source": "/:slug/:path*", "destination": "/_app/index.html" }
+    { "source": "/:slug", "destination": "/_app/index.html" },
+    { "source": "/:slug/(.*)", "destination": "/_app/index.html" }
   ]
 }
