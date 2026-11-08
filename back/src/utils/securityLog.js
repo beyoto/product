@@ -1,5 +1,5 @@
 const pool = require('../config/db.js');
-const { storeFromOrigin } = require('../config/stores.js');
+const { isStore, storeFromOrigin } = require('../config/stores.js');
 
 const SEVERITY = {
   login_success: 'info',
@@ -40,6 +40,12 @@ function isThrottled(type, ip) {
 
 const clip = (value, max) => (typeof value === 'string' ? value.slice(0, max) : null);
 
+// Магазин из тела запроса указывает сам клиент, поэтому годится только для журнала.
+function declaredStore(req) {
+  const store = req.body?.store;
+  return typeof store === 'string' && isStore(store) ? store : null;
+}
+
 // Журнал не должен ломать запрос, поэтому ошибки записи только выводятся в консоль.
 // Пароли и токены сюда не передавать.
 async function recordSecurityEvent(req, type, fields = {}) {
@@ -57,7 +63,7 @@ async function recordSecurityEvent(req, type, fields = {}) {
         SEVERITY[type] || 'info',
         type,
         clip(username, 50),
-        store ?? storeFromOrigin(req.headers.origin),
+        store ?? storeFromOrigin(req.headers.origin) ?? declaredStore(req),
         clip(ip, 64),
         clip(req.headers['user-agent'], 300),
         req.method,

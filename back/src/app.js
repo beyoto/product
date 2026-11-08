@@ -50,10 +50,6 @@ const startViewsSnapshotJobBahaAuto = require('./jobs/viewsSnapshotJob_baha_auto
 app.use('/api/analytics_baha_auto', analyticsBahaAutoRouter);
 startViewsSnapshotJobBahaAuto();
 
-// Роуты гостей (приглашение) — отдельный проект/фича, не связан с товарами
-const guestRouter = require('./routes/guests');
-app.use('/api/guests', guestRouter);
-
 // Роуты авторизации: логин админа, выдача JWT-токена
 const authRouter = require('./routes/auth');
 app.use('/api/auth', authRouter);

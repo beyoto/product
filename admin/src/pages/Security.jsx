@@ -52,6 +52,7 @@ function EventRow({ event, storeLabel, onFilter }) {
   const note = [
     REASON_LABELS[reason],
     target && `цель: ${target}`,
+    event.details.origin === window.location.origin && 'через панель',
     event.method !== 'GET' && event.event_type === 'admin_action' && `${event.method} ${event.path}`,
   ].filter(Boolean).join(' · ');
 
