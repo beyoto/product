@@ -48,7 +48,8 @@
   text-align: center;
 }
 
-.site-header__brand h1 {
+/* .site-header впереди — чтобы правило «.home-page h1» на главной не перекрашивало название */
+.site-header .site-header__brand h1 {
   font-size: 2rem;
   color: var(--header-text);
   letter-spacing: 0.02em;
@@ -121,7 +122,7 @@
     padding: var(--space-md) var(--space-lg);
   }
 
-  .site-header__brand h1 {
+  .site-header .site-header__brand h1 {
     font-size: 2.75rem;
   }
 }
