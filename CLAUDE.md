@@ -37,15 +37,24 @@
 - Права: ключ магазина `site:<slug>` в `admins.stores`; `checkAuth` берёт его из пути `/api/sites/<slug>`.
 - Адрес (`slug`) и тип после создания не меняются. Занятые адреса — `RESERVED_SLUGS` в `back/src/config/stores.js`.
 - Фото — Cloudinary, папка `sites/<slug>`, до 10 на товар. При удалении магазина фото в Cloudinary остаются.
+- **Демо-товары**: `back/src/config/demoProducts.js` — по 5 на тип. Панель → «Магазины» → карточка магазина →
+  «Заполнить демо-товарами» / «Убрать демо-товары» (`POST/DELETE /api/super/sites/:id/demo`, колонка `site_products.is_demo`;
+  товар, изменённый владельцем, перестаёт быть демо и при удалении остаётся). Фото — папка `demo-photos/` рядом с репозиторием
+  (`<NN Тип (type)>/<N — товар>/*.jpg`), загрузка: `cd back && node src/scripts/uploadDemoPhotos.js [тип]` →
+  Cloudinary `demo/<тип>/<товар>-<фото>` и ссылки прямо в `demoProducts.js` (потом закоммитить). Фото есть пока только у `flowers`.
 - Тема: `shops/site/src/theme.js` пишет цвета в CSS-переменные (`--color-gold` = акцент, `--color-ivory` = текст, `--header-*`, `--footer-*`).
   CSS шаблона — копия вёрстки nova, все цвета через переменные/`color-mix`. Новую тему добавлять только в `THEMES`.
+  Осторожно со специфичностью: `.home-page h1` перекрашивал название в шапке (поэтому там `.site-header .site-header__brand h1`).
+  Проверять на тёмной теме («Морской», «Графит», «Золото на чёрном») — в светлых такие ошибки не видны.
+- Карточка товара (`shops/site/src/components/ProductCard.css`): колонка на всю высоту ячейки, цена прижата к низу
+  (`margin-top: auto`) — цены соседних карточек на одной линии. Наведение: тень у фото + название цветом акцента.
 
 ### SEO и превью ссылок (только магазины конструктора)
 - Сайт — SPA, а соцсети (WhatsApp, Telegram, VK, Facebook) не выполняют JS. Поэтому `shops/middleware.js`
   (Vercel Routing Middleware) для `/<slug>/` и `/<slug>/product/<id>` берёт `/_app/index.html` и вписывает
   title, description, canonical, Open Graph, JSON-LD Product. Логика — `shops/seo/render.js`.
   Отдаёт `robots.txt`, `sitemap.xml` (индекс по `GET /api/sites`) и `/<slug>/sitemap.xml`.
-  При любой ошибке/таймауте API (2.5 с) — `next()`, сайт открывается без тегов. Старые магазины не трогает (`legacyStores.js`).
+  При любой ошибке/таймауте API (5 с) — `next()` с заголовком `x-seo: skipped: <причина>` (успех — `x-seo: ok`), сайт открывается без тегов. Старые магазины не трогает (`legacyStores.js`).
 - Данные: `GET /api/sites/<slug>/share?product=<id>` (не считает просмотры) и `GET /api/sites/<slug>/sitemap`.
 - SEO товара — колонка `site_products.seo` `{title, description}`; SEO главной — `sites.info.seoTitle/seoDescription/shareImage`.
   Пусто → подставляется из названия/описания/фото. Картинки Cloudinary обрезаются под 1200×630 через URL.
