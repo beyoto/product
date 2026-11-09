@@ -11,7 +11,8 @@ import {
 } from './seo/render.js';
 
 const API_URL = globalThis.process?.env?.API_URL || 'https://product-production-1794.up.railway.app';
-const API_TIMEOUT_MS = 2500;
+// Мессенджеры и Google ждут ответа дольше; запас на «просыпание» бэкенда после деплоя.
+const API_TIMEOUT_MS = 5000;
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])$/;
 const LEGACY = new Set(LEGACY_STORES);
 
@@ -22,7 +23,10 @@ export const config = {
 
 // То же, что next() из @vercel/functions: пропустить запрос дальше (к rewrites и файлам).
 // Свой вариант — чтобы не тянуть пакет с зависимостями ради одного заголовка.
-const next = () => new Response(null, { headers: { 'x-middleware-next': '1' } });
+// reason попадает в заголовок x-seo ответа — по нему видно, почему теги не вставлены.
+const next = (reason) => new Response(null, {
+  headers: { 'x-middleware-next': '1', ...(reason ? { 'x-seo': `skipped: ${reason}` } : {}) },
+});
 
 async function api(path) {
   const res = await fetch(`${API_URL}/api${path}`, { signal: AbortSignal.timeout(API_TIMEOUT_MS) });
@@ -33,6 +37,7 @@ const respond = (body, type, maxAge = 300) => new Response(body, {
   headers: {
     'Content-Type': `${type}; charset=utf-8`,
     'Cache-Control': `public, max-age=0, s-maxage=${maxAge}, stale-while-revalidate=600`,
+    'x-seo': 'ok',
   },
 });
 
@@ -45,7 +50,7 @@ export default async function middleware(request) {
 
     if (pathname === '/sitemap.xml') {
       const sites = await api('/sites');
-      return sites ? respond(sitemapIndexXml(sites, origin), 'application/xml') : next();
+      return sites ? respond(sitemapIndexXml(sites, origin), 'application/xml') : next('api');
     }
 
     const [slug, ...rest] = pathname.split('/').filter(Boolean);
@@ -53,7 +58,7 @@ export default async function middleware(request) {
 
     if (rest.length === 1 && rest[0] === 'sitemap.xml') {
       const data = await api(`/sites/${slug}/sitemap`);
-      return data ? respond(sitemapXml(slug, data, origin), 'application/xml') : next();
+      return data ? respond(sitemapXml(slug, data, origin), 'application/xml') : next('api');
     }
 
     const isHome = rest.length === 0;
@@ -64,12 +69,13 @@ export default async function middleware(request) {
       api(`/sites/${slug}/share${isProduct ? `?product=${rest[1]}` : ''}`),
       fetch(new URL('/_app/index.html', origin), { signal: AbortSignal.timeout(API_TIMEOUT_MS) }),
     ]);
-    if (!share || !page.ok) return next();
+    if (!share) return next('no shop or product');
+    if (!page.ok) return next('template');
 
     const meta = isProduct ? productMeta(share.site, share.product, origin) : homeMeta(share.site, origin);
     return respond(injectMeta(await page.text(), meta), 'text/html', 60);
   } catch (err) {
     console.error('SEO middleware:', err);
-    return next();
+    return next(err.name === 'TimeoutError' ? 'api timeout' : 'error');
   }
 }

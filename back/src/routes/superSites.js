@@ -1,6 +1,9 @@
 // /api/super/sites — конструктор магазинов. Доступ проверяет super.js (requireSuperAdmin).
+const crypto = require('crypto');
 const express = require('express');
 const bcrypt = require('bcrypt');
+const cloudinary = require('../config/cloudinary');
+const { DEMO_PRODUCTS } = require('../config/demoProducts.js');
 const pool = require('../config/db.js');
 const { SHOP, siteKey } = require('../config/stores.js');
 const { SITE_TYPES, THEMES, toList } = require('../config/siteTypes.js');
@@ -10,6 +13,7 @@ const {
   validateType,
   validateTheme,
   validateInfo,
+  validateProduct,
 } = require('../utils/siteValidation.js');
 const { validatePassword, validateUsername } = require('../utils/passwords.js');
 const { recordSecurityEvent } = require('../utils/securityLog.js');
@@ -36,6 +40,7 @@ function validateName(name) {
 const SITE_FIELDS = `
   s.id, s.slug, s.type, s.theme, s.name, s.info, s.is_active, s.created_at,
   (SELECT COUNT(*)::int FROM site_products p WHERE p.site_id = s.id) AS products_count,
+  (SELECT COUNT(*)::int FROM site_products p WHERE p.site_id = s.id AND p.is_demo) AS demo_count,
   COALESCE(
     (SELECT array_agg(a.username ORDER BY a.username) FROM admins a WHERE ('site:' || s.slug) = ANY(a.stores)),
     '{}'
@@ -151,6 +156,114 @@ router.patch('/:id', async (req, res) => {
 
     const site = await pool.query(`SELECT ${SITE_FIELDS} FROM sites s WHERE s.id = $1`, [req.params.id]);
     res.json(withUrl(site.rows[0]));
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+// ===== Демо-товары для показа магазина клиенту =====
+
+// Фото копируется в Cloudinary один раз (id — хеш ссылки) и переиспользуется всеми магазинами.
+async function demoImage(url, type) {
+  // Фото, уже загруженные в наш Cloudinary (из папки demo-photos), используются как есть.
+  if (url.startsWith(`https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/`)) return url;
+
+  const publicId = crypto.createHash('sha1').update(url).digest('hex').slice(0, 20);
+  const result = await cloudinary.uploader.upload(url, {
+    folder: `demo/${type}`,
+    public_id: publicId,
+    overwrite: false,
+    unique_filename: false,
+  });
+  return result.secure_url;
+}
+
+async function findSite(id) {
+  if (!ID_RE.test(id)) return null;
+  const result = await pool.query('SELECT id, slug, type FROM sites WHERE id = $1', [id]);
+  return result.rows[0] || null;
+}
+
+// POST /api/super/sites/:id/demo — добавить демо-товары под тип магазина
+router.post('/:id/demo', async (req, res) => {
+  try {
+    const site = await findSite(req.params.id);
+    if (!site) return res.status(404).json({ error: 'Магазин не найден' });
+
+    const existing = await pool.query('SELECT COUNT(*)::int AS count FROM site_products WHERE site_id = $1 AND is_demo', [site.id]);
+    if (existing.rows[0].count > 0) return res.status(409).json({ error: 'Демо-товары уже добавлены' });
+
+    const demos = DEMO_PRODUCTS[site.type] || [];
+    let failedImages = 0;
+
+    // Сначала фото (может занять время), потом товары одной транзакцией
+    const prepared = [];
+    for (const demo of demos) {
+      const values = validateProduct(SITE_TYPES[site.type], demo);
+      const images = [];
+      for (const url of demo.images) {
+        try {
+          images.push(await demoImage(url, site.type));
+        } catch (err) {
+          failedImages += 1;
+          console.error('Demo image upload failed:', url, err.message);
+        }
+      }
+      prepared.push({ values, images });
+    }
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      // В обратном порядке, чтобы первый товар из списка оказался первым в каталоге («сначала новые»)
+      for (const { values, images } of [...prepared].reverse()) {
+        const product = await client.query(
+          `INSERT INTO site_products (site_id, name, description, price, category, attributes, seo, is_demo)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, true) RETURNING id`,
+          [site.id, values.name, values.description, values.price, values.category,
+            JSON.stringify(values.attributes), JSON.stringify(values.seo)]
+        );
+        for (const [position, url] of images.entries()) {
+          await client.query(
+            'INSERT INTO site_product_images (product_id, image_url, position) VALUES ($1, $2, $3)',
+            [product.rows[0].id, url, position]
+          );
+        }
+      }
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK').catch(() => {});
+      throw err;
+    } finally {
+      client.release();
+    }
+
+    recordSecurityEvent(req, 'site_updated', {
+      username: req.admin.username,
+      store: siteKey(site.slug),
+      status: 201,
+      details: { target: site.slug, demo: 'added', count: prepared.length },
+    });
+    res.status(201).json({ added: prepared.length, failedImages });
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+// DELETE /api/super/sites/:id/demo — убрать демо-товары (товары, изменённые владельцем, остаются)
+router.delete('/:id/demo', async (req, res) => {
+  try {
+    const site = await findSite(req.params.id);
+    if (!site) return res.status(404).json({ error: 'Магазин не найден' });
+
+    const result = await pool.query('DELETE FROM site_products WHERE site_id = $1 AND is_demo', [site.id]);
+    recordSecurityEvent(req, 'site_updated', {
+      username: req.admin.username,
+      store: siteKey(site.slug),
+      status: 200,
+      details: { target: site.slug, demo: 'removed', count: result.rowCount },
+    });
+    res.json({ removed: result.rowCount });
   } catch (err) {
     handleError(res, err);
   }

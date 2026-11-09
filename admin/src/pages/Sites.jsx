@@ -384,12 +384,14 @@ function SiteForm({ meta, site, onSaved, onCancel }) {
 
 function SiteCard({ site, meta, onEdit, onChanged }) {
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const typeLabel = meta.types.find((item) => item.key === site.type)?.label || site.type;
   const theme = meta.themes.find((item) => item.key === site.theme);
 
   const run = async (request) => {
     setError('');
+    setNotice('');
     setBusy(true);
     try {
       await request();
@@ -399,6 +401,18 @@ function SiteCard({ site, meta, onEdit, onChanged }) {
     } finally {
       setBusy(false);
     }
+  };
+
+  const addDemo = () => run(async () => {
+    const res = await api.post(`/super/sites/${site.id}/demo`);
+    setNotice(res.data.failedImages
+      ? `Добавлено товаров: ${res.data.added}. Не загрузились фото: ${res.data.failedImages}.`
+      : `Добавлено товаров: ${res.data.added}.`);
+  });
+
+  const removeDemo = () => {
+    if (!window.confirm(`Удалить демо-товары (${site.demo_count}) из «${site.name}»? Товары, которые владелец уже изменил или добавил сам, останутся.`)) return;
+    run(() => api.delete(`/super/sites/${site.id}/demo`));
   };
 
   const remove = () => {
@@ -415,7 +429,10 @@ function SiteCard({ site, meta, onEdit, onChanged }) {
       <header className="card__head">
         <div>
           <strong>{site.name}</strong>
-          <p className="muted">{typeLabel} · {theme?.label || site.theme} · товаров: {site.products_count}</p>
+          <p className="muted">
+            {typeLabel} · {theme?.label || site.theme} · товаров: {site.products_count}
+            {site.demo_count > 0 && ` (из них демо: ${site.demo_count})`}
+          </p>
         </div>
         <span className="muted">{site.is_active ? 'Работает' : 'Отключён'}</span>
       </header>
@@ -430,8 +447,16 @@ function SiteCard({ site, meta, onEdit, onChanged }) {
         <button type="button" onClick={() => run(() => api.patch(`/super/sites/${site.id}`, { is_active: !site.is_active }))} disabled={busy}>
           {site.is_active ? 'Отключить' : 'Включить'}
         </button>
+        {site.demo_count > 0 ? (
+          <button type="button" onClick={removeDemo} disabled={busy}>Убрать демо-товары</button>
+        ) : (
+          <button type="button" onClick={addDemo} disabled={busy} title="5 примеров товаров с фото — чтобы показать магазин клиенту">
+            {busy ? 'Добавляем…' : 'Заполнить демо-товарами'}
+          </button>
+        )}
         <button type="button" className="danger" onClick={remove} disabled={busy}>Удалить</button>
       </div>
+      {notice && <p className="muted">{notice}</p>}
       {error && <p className="error">{error}</p>}
     </article>
   );

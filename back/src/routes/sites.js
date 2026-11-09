@@ -126,7 +126,7 @@ router.get('/products', requireActiveSite, async (req, res) => {
         : `p.attributes ->> ${keyParam} = ${valueParam}`);
     }
 
-    let order = 'p.created_at DESC';
+    let order = 'p.created_at DESC, p.id DESC';
     if (sort === 'price_asc') order = 'p.price ASC, p.id DESC';
     else if (sort === 'price_desc') order = 'p.price DESC, p.id DESC';
 
@@ -232,7 +232,7 @@ router.get('/admin/products', checkAuth, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT p.*, ${IMAGES_URLS} FROM site_products p
-       WHERE p.site_id = $1 ORDER BY p.created_at DESC`,
+       WHERE p.site_id = $1 ORDER BY p.created_at DESC, p.id DESC`,
       [req.site.id]
     );
     res.json(result.rows);
@@ -296,6 +296,8 @@ router.put('/products/:id', checkAuth, async (req, res) => {
       sets.push(`${key} = $${params.length}`);
     }
     if (sets.length === 0) throw new ValidationError('Нечего сохранять');
+    // Демо-товар, который владелец отредактировал, становится обычным и не удалится вместе с демо.
+    if (Object.keys(values).some((key) => key !== 'is_active')) sets.push('is_demo = false');
 
     params.push(req.params.id, req.site.id);
     const result = await pool.query(

@@ -33,6 +33,8 @@ async function ensureSites() {
     CREATE INDEX IF NOT EXISTS site_products_site_idx ON site_products (site_id, is_active, created_at DESC);
     -- SEO товара: { title, description }. Добавлено позже, поэтому отдельной командой.
     ALTER TABLE site_products ADD COLUMN IF NOT EXISTS seo JSONB NOT NULL DEFAULT '{}';
+    -- Демо-товары, которые суперадмин добавляет для показа магазина клиенту (config/demoProducts.js).
+    ALTER TABLE site_products ADD COLUMN IF NOT EXISTS is_demo BOOLEAN NOT NULL DEFAULT false;
 
     CREATE TABLE IF NOT EXISTS site_product_images (
       id SERIAL PRIMARY KEY,
