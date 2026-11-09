@@ -71,13 +71,13 @@ for (const slug of stores) {
   });
 }
 
-const links = listStores()
-  .map((slug) => `<li><a href="/${slug}/">${slug}</a></li>`)
-  .join('');
-
-fs.writeFileSync(
-  path.join(DIST, 'index.html'),
-  `<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Магазины</title></head><body><h1>Магазины</h1><ul>${links}</ul></body></html>`
-);
+// Главная kg-shop.vercel.app — визитка владельца (landing/), список магазинов не показываем.
+// index.html → корень, картинки → /_landing/ (путь с «_» не примут за адрес магазина).
+const LANDING = path.join(ROOT, 'landing');
+fs.mkdirSync(path.join(DIST, '_landing'), { recursive: true });
+for (const file of fs.readdirSync(LANDING)) {
+  const target = file === 'index.html' ? path.join(DIST, 'index.html') : path.join(DIST, '_landing', file);
+  fs.copyFileSync(path.join(LANDING, file), target);
+}
 
 console.log(`\nГотово: ${stores.length} магаз.${buildSite ? ' + шаблон конструктора' : ''}`);

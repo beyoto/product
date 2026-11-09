@@ -70,7 +70,8 @@
 - `shops/stores/<slug>/store.json` — `{ "key": "<ключ бэкенда>" }`.
 - `shops/scripts/stores.mjs` копирует `core` + `stores/<slug>` в `shops/.build/<slug>` и задаёт env:
   `VITE_STORE` (= slug), `VITE_STORE_KEY` (= key), `VITE_API_URL` (по умолчанию Railway).
-- `shops/scripts/build.mjs` собирает каждый магазин с `base: /<slug>/` в `shops/dist/<slug>` и пишет `dist/index.html`
+- `shops/scripts/build.mjs` собирает каждый магазин с `base: /<slug>/` в `shops/dist/<slug>` и копирует визитку владельца
+  `shops/landing/` (главная kg-shop — продающая страница владельца: index.html → корень, фото → `/_landing/`; список магазинов не показываем)
   (служебный список ссылок — это и есть «голая» главная `kg-shop.vercel.app`).
 - `shops/vercel.json`: первый rewrite — явный список старых магазинов → `/<slug>/index.html`, второй — всё остальное → `/_app/index.html` (конструктор).
   **Новая папка в `stores/` = добавить её в этот список**, иначе сборка упадёт (`checkVercelRewrites` в `scripts/stores.mjs`) — и в `RESERVED_SLUGS` на бэке.
