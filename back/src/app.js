@@ -9,8 +9,17 @@ const PORT = process.env.PORT || 3000;
 // Railway стоит перед сервером как прокси, без этого req.ip будет адресом прокси.
 app.set('trust proxy', 1);
 
+// Не сообщаем, на чём написан сервер, и ставим базовые заголовки безопасности.
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff'); // не угадывать тип ответа
+  res.setHeader('X-Frame-Options', 'DENY'); // запрет вставки в <iframe> (защита от кликджекинга)
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  next();
+});
+
 app.use(cors());
-app.use(express.json()); // Позволяет читать JSON из тела запроса (req.body)
+app.use(express.json({ limit: '1mb' })); // читаем JSON из тела (req.body); лимит против раздутых тел
 
 // Роуты товаров: GET/POST/PUT/DELETE для CRUD, включая GET /admin/all
 const productRouter = require('./routes/products');
