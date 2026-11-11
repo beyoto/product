@@ -41,7 +41,7 @@
   «Заполнить демо-товарами» / «Убрать демо-товары» (`POST/DELETE /api/super/sites/:id/demo`, колонка `site_products.is_demo`;
   товар, изменённый владельцем, перестаёт быть демо и при удалении остаётся). Фото — папка `demo-photos/` рядом с репозиторием
   (`<NN Тип (type)>/<N — товар>/*.jpg`), загрузка: `cd back && node src/scripts/uploadDemoPhotos.js [тип]` →
-  Cloudinary `demo/<тип>/<товар>-<фото>` и ссылки прямо в `demoProducts.js` (потом закоммитить). Фото есть пока только у `flowers`.
+  Cloudinary `demo/<тип>/<товар>-<фото>` и ссылки прямо в `demoProducts.js` (потом закоммитить). Фото есть у `flowers` и `clothing`.
 - Тема: `shops/site/src/theme.js` пишет цвета в CSS-переменные (`--color-gold` = акцент, `--color-ivory` = текст, `--header-*`, `--footer-*`).
   CSS шаблона — копия вёрстки nova, все цвета через переменные/`color-mix`. Новую тему добавлять только в `THEMES`.
   Осторожно со специфичностью: `.home-page h1` перекрашивал название в шапке (поэтому там `.site-header .site-header__brand h1`).

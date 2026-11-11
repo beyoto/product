@@ -66,7 +66,10 @@ const DEMO_PRODUCTS = {
       price: 3900,
       category: 'outerwear',
       attributes: { gender: 'unisex', sizes: ['s', 'm', 'l', 'xl'], color: 'Голубой', material: '100% хлопок', season: 'demi' },
-      images: [],
+      images: [
+        'https://res.cloudinary.com/dwkhqenbz/image/upload/v1794407661/demo/clothing/1-1.jpg',
+        'https://res.cloudinary.com/dwkhqenbz/image/upload/v1794407663/demo/clothing/1-2.jpg',
+      ],
     },
     {
       name: 'Базовая белая футболка',
@@ -74,7 +77,9 @@ const DEMO_PRODUCTS = {
       price: 890,
       category: 'tshirt',
       attributes: { gender: 'unisex', sizes: ['xs', 's', 'm', 'l', 'xl', 'xxl'], color: 'Белый', material: '100% хлопок', season: 'all' },
-      images: [],
+      images: [
+        'https://res.cloudinary.com/dwkhqenbz/image/upload/v1794407664/demo/clothing/2-1.jpg',
+      ],
     },
     {
       name: 'Худи с капюшоном',
@@ -82,7 +87,9 @@ const DEMO_PRODUCTS = {
       price: 2400,
       category: 'hoodie',
       attributes: { gender: 'unisex', sizes: ['s', 'm', 'l', 'xl'], color: 'Серый', material: 'Хлопок, полиэстер', season: 'demi' },
-      images: [],
+      images: [
+        'https://res.cloudinary.com/dwkhqenbz/image/upload/v1794407665/demo/clothing/3-1.jpg',
+      ],
     },
     {
       name: 'Летнее платье миди',
@@ -90,7 +97,9 @@ const DEMO_PRODUCTS = {
       price: 3200,
       category: 'dress',
       attributes: { gender: 'women', sizes: ['xs', 's', 'm', 'l'], color: 'Белый', material: 'Вискоза', season: 'summer' },
-      images: [],
+      images: [
+        'https://res.cloudinary.com/dwkhqenbz/image/upload/v1794407667/demo/clothing/4-1.jpg',
+      ],
     },
     {
       name: 'Джинсы прямого кроя',
@@ -98,7 +107,9 @@ const DEMO_PRODUCTS = {
       price: 2700,
       category: 'jeans',
       attributes: { gender: 'men', sizes: ['m', 'l', 'xl', 'xxl'], color: 'Синий', material: 'Хлопок, эластан', season: 'all' },
-      images: [],
+      images: [
+        'https://res.cloudinary.com/dwkhqenbz/image/upload/v1794407669/demo/clothing/5-1.jpg',
+      ],
     },
   ],
 
